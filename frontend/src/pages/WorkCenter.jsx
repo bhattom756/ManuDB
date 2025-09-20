@@ -1,216 +1,225 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import Sidebar from '@/components/Sidebar'
+import WorkCenterForm from '../components/WorkCenterForm'
 
-export default function WorkCenter() {
+const WorkCentersContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedFilter, setSelectedFilter] = useState('All')
-  const [selectedRows, setSelectedRows] = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [viewMode, setViewMode] = useState('list') // 'list' or 'kanban'
+  const [showForm, setShowForm] = useState(false)
+  const [editingWorkCenter, setEditingWorkCenter] = useState(null)
 
-  // Sample data for work centers
+  // Sample Work Centers data
   const workCenters = [
     {
-      id: 'WC-000001',
-      name: 'Assembly Line 1',
-      type: 'Assembly',
-      status: 'Active',
-      capacity: '100%',
-      efficiency: '95%',
-      location: 'Building A',
-      supervisor: 'John Smith'
+      id: 'WC-001',
+      name: 'Work Center -1',
+      costPerHour: 50,
+      description: 'Main assembly line for furniture production',
+      capacity: 8,
+      efficiency: 95
     },
     {
-      id: 'WC-000002',
-      name: 'Cutting Station',
-      type: 'Cutting',
-      status: 'Maintenance',
-      capacity: '0%',
-      efficiency: '0%',
-      location: 'Building B',
-      supervisor: 'Jane Doe'
+      id: 'WC-002',
+      name: 'Work Center -2',
+      costPerHour: 45,
+      description: 'Quality control and finishing station',
+      capacity: 6,
+      efficiency: 92
+    },
+    {
+      id: 'WC-003',
+      name: 'Work Center -3',
+      costPerHour: 60,
+      description: 'Heavy machinery and cutting operations',
+      capacity: 4,
+      efficiency: 88
+    },
+    {
+      id: 'WC-004',
+      name: 'Work Center -4',
+      costPerHour: 35,
+      description: 'Packaging and shipping preparation',
+      capacity: 10,
+      efficiency: 98
     }
   ]
 
-  const statusCounts = {
-    All: {
-      Active: 8,
-      Maintenance: 2,
-      Inactive: 1,
-      'Under Construction': 1
-    },
-    My: {
-      Active: 5,
-      Maintenance: 1
-    }
+  const filteredWorkCenters = workCenters.filter(center => 
+    center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    center.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const handleNewWorkCenter = () => {
+    setEditingWorkCenter(null)
+    setShowForm(true)
   }
 
-  const handleRowSelect = (orderId) => {
-    setSelectedRows(prev => 
-      prev.includes(orderId) 
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    )
+  const handleEditWorkCenter = (workCenter) => {
+    setEditingWorkCenter(workCenter)
+    setShowForm(true)
   }
 
-  const handleSelectAll = () => {
-    setSelectedRows(
-      selectedRows.length === workCenters.length 
-        ? [] 
-        : workCenters.map(order => order.id)
-    )
+  const handleCloseForm = () => {
+    setShowForm(false)
+    setEditingWorkCenter(null)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <button 
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-lg font-semibold">Work Center</div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 lg:p-6 space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Work Center</h1>
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">Manage work centers and their operational costs</p>
             </div>
-
+            
             <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              <Button 
+                onClick={handleNewWorkCenter}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm lg:text-base px-4 py-2 lg:px-6 lg:py-3"
+              >
+                <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
+                New
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and View Controls */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search by work center..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Allow user to search based on work center</p>
+            </div>
+            
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <div className="flex items-center space-x-1 lg:space-x-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('kanban')}
+                  className={`p-2 rounded-lg ${viewMode === 'kanban' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-pink-400">
-            Work Center
-          </h1>
-        </div>
-
-        <div className="flex items-center justify-between mb-6">
-          <Button className="bg-pink-500 hover:bg-pink-600 text-white">
-            New Work Center
-          </Button>
+        {/* Work Centers Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Work Centers</h3>
+            <p className="text-sm text-gray-600">Manage work center operations and costs</p>
+          </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search Work Centers"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Status Filters */}
-        <div className="mb-6">
-          <div className="flex space-x-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-pink-400">All</h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(statusCounts.All).map(([status, count]) => (
-                  <button
-                    key={status}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedFilter === 'All' 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    onClick={() => setSelectedFilter('All')}
-                  >
-                    {count} {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-pink-400">My</h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(statusCounts.My).map(([status, count]) => (
-                  <button
-                    key={status}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedFilter === 'My' 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    onClick={() => setSelectedFilter('My')}
-                  >
-                    {count} {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Table */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.length === workCenters.length}
-                      onChange={handleSelectAll}
-                      className="rounded border-gray-600 bg-gray-800 text-pink-500 focus:ring-pink-500"
-                    />
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cost per hour
+                    <span className="block text-xs text-gray-400 font-normal mt-1">Hourly processing cost</span>
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Type</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Capacity</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Efficiency</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Location</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Supervisor</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {workCenters.map((center) => (
-                  <tr key={center.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(center.id)}
-                        onChange={() => handleRowSelect(center.id)}
-                        className="rounded border-gray-300 bg-white text-pink-500 focus:ring-pink-500"
-                      />
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredWorkCenters.length > 0 ? (
+                  filteredWorkCenters.map((center) => (
+                    <tr key={center.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{center.name}</div>
+                          <div className="text-xs text-gray-500">{center.description}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">${center.costPerHour}</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{center.capacity} units</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="text-sm text-gray-900 mr-2">{center.efficiency}%</div>
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${center.efficiency}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleEditWorkCenter(center)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Edit
+                          </button>
+                          <button className="text-red-600 hover:text-red-900">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
+                      <div className="text-gray-500 text-sm">
+                        {searchTerm ? 'No work centers found matching your search.' : 'No work centers available.'}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.id}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.type}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.status}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.capacity}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.efficiency}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.location}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{center.supervisor}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* Work Center Form Modal */}
+      {showForm && (
+        <WorkCenterForm 
+          isOpen={showForm}
+          onClose={handleCloseForm}
+          editingWorkCenter={editingWorkCenter}
+        />
+      )}
     </div>
   )
 }
+
+export default WorkCentersContent
