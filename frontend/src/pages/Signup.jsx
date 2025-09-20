@@ -42,14 +42,17 @@ export default function Signup() {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      await register({
+      console.log('Attempting registration with:', data.email)
+      const response = await register({
         name: data.name,
         email: data.email,
         password: data.password
       })
+      console.log('Registration response:', response)
       toast.success('Account created successfully!')
       navigate('/dashboard')
     } catch (error) {
+      console.error('Registration error:', error)
       toast.error(error.response?.data?.error || 'Registration failed')
     } finally {
       setIsLoading(false)

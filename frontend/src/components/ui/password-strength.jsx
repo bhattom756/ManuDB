@@ -1,36 +1,54 @@
-import React from 'react';
-import { validatePasswordStrength } from '@/lib/validations';
+import React from 'react'
 
 const PasswordStrengthIndicator = ({ password }) => {
-  if (!password) return null;
+  const getPasswordStrength = (password) => {
+    let score = 0
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      special: /[@$!%*?&]/.test(password)
+    }
 
-  const { checks, strength } = validatePasswordStrength(password);
-  
+    score = Object.values(checks).filter(Boolean).length
+
+    return {
+      score,
+      checks,
+      strength: score < 2 ? 'weak' : score < 4 ? 'medium' : 'strong'
+    }
+  }
+
+  const { score, checks, strength } = getPasswordStrength(password)
+
+  if (!password) return null
+
   const getStrengthColor = () => {
     switch (strength) {
-      case 'weak': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'strong': return 'bg-green-500';
-      default: return 'bg-gray-300';
+      case 'weak': return 'bg-red-500'
+      case 'medium': return 'bg-yellow-500'
+      case 'strong': return 'bg-green-500'
+      default: return 'bg-gray-300'
     }
-  };
+  }
 
   const getStrengthText = () => {
     switch (strength) {
-      case 'weak': return 'Weak';
-      case 'medium': return 'Medium';
-      case 'strong': return 'Strong';
-      default: return '';
+      case 'weak': return 'Weak'
+      case 'medium': return 'Medium'
+      case 'strong': return 'Strong'
+      default: return ''
     }
-  };
+  }
 
   return (
-    <div className="space-y-2">
+    <div className="mt-2 space-y-2">
       <div className="flex items-center space-x-2">
         <div className="flex-1 bg-gray-200 rounded-full h-2">
           <div 
             className={`h-2 rounded-full transition-all duration-300 ${getStrengthColor()}`}
-            style={{ width: `${(Object.values(checks).filter(Boolean).length / 5) * 100}%` }}
+            style={{ width: `${(score / 5) * 100}%` }}
           />
         </div>
         <span className="text-xs font-medium text-gray-600">
@@ -61,7 +79,7 @@ const PasswordStrengthIndicator = ({ password }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PasswordStrengthIndicator;
+export default PasswordStrengthIndicator

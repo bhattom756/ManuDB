@@ -27,10 +27,13 @@ export default function Login() {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      await login(data.email, data.password)
+      console.log('Attempting login with:', data.email)
+      const response = await login(data.email, data.password)
+      console.log('Login response:', response)
       toast.success('Login successful!')
       navigate('/dashboard')
     } catch (error) {
+      console.error('Login error:', error)
       toast.error(error.response?.data?.error || 'Login failed')
     } finally {
       setIsLoading(false)

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const { withAccelerate } = require('@prisma/extension-accelerate');
 
