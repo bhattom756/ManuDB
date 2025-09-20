@@ -1,4 +1,4 @@
-const prisma = require('../config/database');
+const db = require('../config/database');
 
 class ComponentAvailabilityService {
   // Update component availability based on stock movements

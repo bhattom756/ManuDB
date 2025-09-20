@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "manufacturing-management-system-api",
-		"name": "Manufacturing Management System API - Clean & Role-Based",
-		"description": "Clean, streamlined API collection for Manufacturing Management System with role-based access and essential features only",
+		"name": "Manufacturing Management System API - Complete Collection",
+		"description": "Complete API collection for Manufacturing Management System with all endpoints, correct parameters, and role-based access",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"auth": {
@@ -29,6 +29,26 @@
 	],
 	"item": [
 		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "API Health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Authentication",
 			"item": [
 				{
@@ -52,6 +72,30 @@
 							"raw": "{{base_url}}/api/auth/create-default-admin",
 							"host": ["{{base_url}}"],
 							"path": ["api", "auth", "create-default-admin"]
+						}
+					}
+				},
+				{
+					"name": "Register Business Owner",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Business Owner\",\n  \"email\": \"owner@company.com\",\n  \"password\": \"Owner@1234\",\n  \"mobileNo\": \"1111111111\",\n  \"role\": \"BUSINESS_OWNER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
 						}
 					}
 				},
@@ -95,30 +139,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"Mike Operator\",\n  \"email\": \"mike.operator@company.com\",\n  \"password\": \"Operator@123\",\n  \"mobileNo\": \"9876543211\",\n  \"role\": \"OPERATOR\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "register"]
-						}
-					}
-				},
-				{
-					"name": "Register Business Owner",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Administrator\",\n  \"email\": \"heet111@gmail.com\",\n  \"password\": \"Admin@1234\",\n  \"mobileNo\": \"1234567890\",\n  \"role\": \"BUSINESS_OWNER\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -181,7 +201,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"heet111@gmail.com\",\n  \"password\": \"Admin@1234\"\n}"
+							"raw": "{\n  \"email\": \"owner@company.com\",\n  \"password\": \"Owner@1234\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
@@ -198,7 +218,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/auth/profile",
 							"host": ["{{base_url}}"],
-							"path": ["auth", "profile"]
+							"path": ["api", "auth", "profile"]
 						}
 					}
 				},
@@ -219,7 +239,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/auth/profile",
 							"host": ["{{base_url}}"],
-							"path": ["auth", "profile"]
+							"path": ["api", "auth", "profile"]
 						}
 					}
 				},
@@ -235,12 +255,57 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"currentPassword\": \"Admin@1234\",\n  \"newPassword\": \"NewPass@1234\"\n}"
+							"raw": "{\n  \"currentPassword\": \"Owner@1234\",\n  \"newPassword\": \"NewPass@1234\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/change-password",
 							"host": ["{{base_url}}"],
-							"path": ["auth", "change-password"]
+							"path": ["api", "auth", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "users"]
+						}
+					}
+				},
+				{
+					"name": "Update User Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"MANUFACTURING_MANAGER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/users/2/role",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "users", "2", "role"]
+						}
+					}
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/users/2/deactivate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "users", "2", "deactivate"]
 						}
 					}
 				},
@@ -252,24 +317,24 @@
 						"url": {
 							"raw": "{{base_url}}/api/auth/logout",
 							"host": ["{{base_url}}"],
-							"path": ["auth", "logout"]
+							"path": ["api", "auth", "logout"]
 						}
 					}
 				}
 			]
 		},
 		{
-			"name": "Dashboard - Role-Based",
+			"name": "Dashboard",
 			"item": [
 				{
-					"name": "Get Dashboard Summary (Role-Specific)",
+					"name": "Get Dashboard Summary",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/dashboard/summary",
 							"host": ["{{base_url}}"],
-							"path": ["dashboard", "summary"]
+							"path": ["api", "dashboard", "summary"]
 						}
 					}
 				},
@@ -281,7 +346,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/dashboard/manufacturing-orders?page=1&limit=10&search=&status=&assigneeId=",
 							"host": ["{{base_url}}"],
-							"path": ["dashboard", "manufacturing-orders"],
+							"path": ["api", "dashboard", "manufacturing-orders"],
 							"query": [
 								{
 									"key": "page",
@@ -315,7 +380,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/dashboard/low-stock-products?threshold=10",
 							"host": ["{{base_url}}"],
-							"path": ["dashboard", "low-stock-products"],
+							"path": ["api", "dashboard", "low-stock-products"],
 							"query": [
 								{
 									"key": "threshold",
@@ -333,7 +398,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/dashboard/kpis?startDate=2025-09-01&endDate=2025-09-30",
 							"host": ["{{base_url}}"],
-							"path": ["dashboard", "kpis"],
+							"path": ["api", "dashboard", "kpis"],
 							"query": [
 								{
 									"key": "startDate",
@@ -350,26 +415,6 @@
 			]
 		},
 		{
-			"name": "Health Check",
-			"item": [
-				{
-					"name": "API Health",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/health",
-							"host": ["{{base_url}}"],
-							"path": ["health"]
-						}
-					}
-				}
-			]
-		},
-		{
 			"name": "Products",
 			"item": [
 				{
@@ -378,9 +423,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/products?page=1&limit=10",
+							"raw": "{{base_url}}/api/products?page=1&limit=10&search=&type=",
 							"host": ["{{base_url}}"],
-							"path": ["products"],
+							"path": ["api", "products"],
 							"query": [
 								{
 									"key": "page",
@@ -389,6 +434,14 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": ""
 								}
 							]
 						}
@@ -402,7 +455,43 @@
 						"url": {
 							"raw": "{{base_url}}/api/products/1",
 							"host": ["{{base_url}}"],
-							"path": ["products", "1"]
+							"path": ["api", "products", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Product Stock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/1/stock",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1", "stock"]
+						}
+					}
+				},
+				{
+					"name": "Get Product Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/meta/types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "meta", "types"]
+						}
+					}
+				},
+				{
+					"name": "Get Units of Measure",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/meta/units",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "meta", "units"]
 						}
 					}
 				},
@@ -423,7 +512,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/products",
 							"host": ["{{base_url}}"],
-							"path": ["products"]
+							"path": ["api", "products"]
 						}
 					}
 				},
@@ -444,7 +533,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/products",
 							"host": ["{{base_url}}"],
-							"path": ["products"]
+							"path": ["api", "products"]
 						}
 					}
 				},
@@ -465,7 +554,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/products",
 							"host": ["{{base_url}}"],
-							"path": ["products"]
+							"path": ["api", "products"]
 						}
 					}
 				},
@@ -486,43 +575,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/products/1",
 							"host": ["{{base_url}}"],
-							"path": ["products", "1"]
-						}
-					}
-				},
-				{
-					"name": "Get Product Stock",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/products/1/stock",
-							"host": ["{{base_url}}"],
-							"path": ["products", "1", "stock"]
-						}
-					}
-				},
-				{
-					"name": "Get Product Types",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/products/meta/types",
-							"host": ["{{base_url}}"],
-							"path": ["products", "meta", "types"]
-						}
-					}
-				},
-				{
-					"name": "Get Units of Measure",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/products/meta/units",
-							"host": ["{{base_url}}"],
-							"path": ["products", "meta", "units"]
+							"path": ["api", "products", "1"]
 						}
 					}
 				},
@@ -534,7 +587,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/products/1",
 							"host": ["{{base_url}}"],
-							"path": ["products", "1"]
+							"path": ["api", "products", "1"]
 						}
 					}
 				}
@@ -549,9 +602,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/work-centers?page=1&limit=10",
+							"raw": "{{base_url}}/api/work-centers?page=1&limit=10&search=&status=",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers"],
+							"path": ["api", "work-centers"],
 							"query": [
 								{
 									"key": "page",
@@ -560,6 +613,14 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
 								}
 							]
 						}
@@ -573,70 +634,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-centers/1",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers", "1"]
-						}
-					}
-				},
-				{
-					"name": "Create Work Center",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Assembly Line 1\",\n  \"capacity\": 8,\n  \"costPerHour\": 50.00,\n  \"status\": \"ACTIVE\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/work-centers",
-							"host": ["{{base_url}}"],
-							"path": ["work-centers"]
-						}
-					}
-				},
-				{
-					"name": "Update Work Center",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Updated Assembly Line 1\",\n  \"capacity\": 10,\n  \"costPerHour\": 55.00\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/work-centers/1",
-							"host": ["{{base_url}}"],
-							"path": ["work-centers", "1"]
-						}
-					}
-				},
-				{
-					"name": "Update Work Center Status",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"status\": \"UNDER_MAINTENANCE\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/work-centers/1/status",
-							"host": ["{{base_url}}"],
-							"path": ["work-centers", "1", "status"]
+							"path": ["api", "work-centers", "1"]
 						}
 					}
 				},
@@ -648,7 +646,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-centers/1/utilization?startDate=2025-09-01&endDate=2025-09-30",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers", "1", "utilization"],
+							"path": ["api", "work-centers", "1", "utilization"],
 							"query": [
 								{
 									"key": "startDate",
@@ -670,7 +668,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-centers/meta/statuses",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers", "meta", "statuses"]
+							"path": ["api", "work-centers", "meta", "statuses"]
 						}
 					}
 				},
@@ -682,7 +680,70 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-centers/meta/stats",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers", "meta", "stats"]
+							"path": ["api", "work-centers", "meta", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Create Work Center",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Assembly Line 1\",\n  \"capacity\": 8,\n  \"costPerHour\": 50.00,\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-centers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-centers"]
+						}
+					}
+				},
+				{
+					"name": "Update Work Center",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Assembly Line 1\",\n  \"capacity\": 10,\n  \"costPerHour\": 55.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-centers/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-centers", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Work Center Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"UNDER_MAINTENANCE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-centers/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-centers", "1", "status"]
 						}
 					}
 				},
@@ -694,7 +755,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-centers/1",
 							"host": ["{{base_url}}"],
-							"path": ["work-centers", "1"]
+							"path": ["api", "work-centers", "1"]
 						}
 					}
 				}

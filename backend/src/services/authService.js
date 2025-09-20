@@ -1,17 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const prisma = require('../config/database');
+const db = require('../config/database');
 
 class AuthService {
   async register(userData) {
     const { name, email, password, mobileNo, role = 'OPERATOR' } = userData;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    const existingUserResult = await db.query(
+      'SELECT id FROM users WHERE email = $1',
+      [email]
+    );
 
-    if (existingUser) {
+    if (existingUserResult.rows.length > 0) {
       throw new Error('User with this email already exists');
     }
 
@@ -20,24 +21,14 @@ class AuthService {
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        mobileNo,
-        role
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        mobileNo: true,
-        role: true,
-        isActive: true,
-        createdAt: true
-      }
-    });
+    const userResult = await db.query(
+      `INSERT INTO users (name, email, password_hash, mobile_no, role)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, email, mobile_no, role, is_active, created_at`,
+      [name, email, passwordHash, mobileNo, role]
+    );
+
+    const user = userResult.rows[0];
 
     // Generate JWT token
     const token = this.generateToken(user);
@@ -52,19 +43,19 @@ class AuthService {
     const { email, password } = credentials;
 
     // Find user by email
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-        isActive: true
-      }
-    });
+    const userResult = await db.query(
+      'SELECT * FROM users WHERE email = $1 AND is_active = true',
+      [email]
+    );
 
-    if (!user) {
+    if (userResult.rows.length === 0) {
       throw new Error('Invalid credentials');
     }
 
+    const user = userResult.rows[0];
+
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
       throw new Error('Invalid credentials');
@@ -74,7 +65,7 @@ class AuthService {
     const token = this.generateToken(user);
 
     // Return user data without password
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { password_hash, ...userWithoutPassword } = user;
 
     return {
       user: userWithoutPassword,
@@ -83,16 +74,19 @@ class AuthService {
   }
 
   async changePassword(userId, currentPassword, newPassword) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
+    const userResult = await db.query(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [userId]
+    );
 
-    if (!user) {
+    if (userResult.rows.length === 0) {
       throw new Error('User not found');
     }
 
+    const user = userResult.rows[0];
+
     // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash);
 
     if (!isValidPassword) {
       throw new Error('Current password is incorrect');
@@ -103,10 +97,10 @@ class AuthService {
     const passwordHash = await bcrypt.hash(newPassword, saltRounds);
 
     // Update password
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash }
-    });
+    await db.query(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [passwordHash, userId]
+    );
 
     return { message: 'Password changed successfully' };
   }
@@ -116,37 +110,25 @@ class AuthService {
 
     // Check if email is already taken by another user
     if (email) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          email,
-          id: { not: userId }
-        }
-      });
+      const existingUserResult = await db.query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [email, userId]
+      );
 
-      if (existingUser) {
+      if (existingUserResult.rows.length > 0) {
         throw new Error('Email is already taken by another user');
       }
     }
 
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name,
-        email,
-        mobileNo
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        mobileNo: true,
-        role: true,
-        isActive: true,
-        updatedAt: true
-      }
-    });
+    const userResult = await db.query(
+      `UPDATE users 
+       SET name = $1, email = $2, mobile_no = $3, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4
+       RETURNING id, name, email, mobile_no, role, is_active, updated_at`,
+      [name, email, mobileNo, userId]
+    );
 
-    return user;
+    return userResult.rows[0];
   }
 
   generateToken(user) {
@@ -173,11 +155,12 @@ class AuthService {
   async createDefaultAdmin() {
     try {
       // Check if admin already exists
-      const existingAdmin = await prisma.user.findUnique({
-        where: { email: 'heet111@gmail.com' }
-      });
+      const existingAdminResult = await db.query(
+        'SELECT id FROM users WHERE email = $1',
+        ['heet111@gmail.com']
+      );
 
-      if (existingAdmin) {
+      if (existingAdminResult.rows.length > 0) {
         return { message: 'Default admin user already exists' };
       }
 
@@ -185,24 +168,14 @@ class AuthService {
       const saltRounds = 12;
       const passwordHash = await bcrypt.hash('Admin@1234', saltRounds);
 
-      const admin = await prisma.user.create({
-        data: {
-          name: 'Administrator',
-          email: 'heet111@gmail.com',
-          passwordHash,
-          mobileNo: '1234567890',
-          role: 'BUSINESS_OWNER'
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          mobileNo: true,
-          role: true,
-          isActive: true,
-          createdAt: true
-        }
-      });
+      const adminResult = await db.query(
+        `INSERT INTO users (name, email, password_hash, mobile_no, role)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, name, email, mobile_no, role, is_active, created_at`,
+        ['Administrator', 'heet111@gmail.com', passwordHash, '1234567890', 'BUSINESS_OWNER']
+      );
+
+      const admin = adminResult.rows[0];
 
       return {
         message: 'Default admin user created successfully',
@@ -215,23 +188,13 @@ class AuthService {
 
   async getAllUsers() {
     try {
-      const users = await prisma.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          mobileNo: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
+      const usersResult = await db.query(
+        `SELECT id, name, email, mobile_no, role, is_active, created_at, updated_at
+         FROM users
+         ORDER BY created_at DESC`
+      );
 
-      return users;
+      return usersResult.rows;
     } catch (error) {
       throw new Error(`Failed to fetch users: ${error.message}`);
     }
@@ -239,20 +202,15 @@ class AuthService {
 
   async updateUserRole(userId, role) {
     try {
-      const user = await prisma.user.update({
-        where: { id: userId },
-        data: { role },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          isActive: true,
-          updatedAt: true
-        }
-      });
+      const userResult = await db.query(
+        `UPDATE users 
+         SET role = $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2
+         RETURNING id, name, email, role, is_active, updated_at`,
+        [role, userId]
+      );
 
-      return user;
+      return userResult.rows[0];
     } catch (error) {
       throw new Error(`Failed to update user role: ${error.message}`);
     }
@@ -260,19 +218,15 @@ class AuthService {
 
   async deactivateUser(userId) {
     try {
-      const user = await prisma.user.update({
-        where: { id: userId },
-        data: { isActive: false },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          isActive: true,
-          updatedAt: true
-        }
-      });
+      const userResult = await db.query(
+        `UPDATE users 
+         SET is_active = false, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1
+         RETURNING id, name, email, is_active, updated_at`,
+        [userId]
+      );
 
-      return user;
+      return userResult.rows[0];
     } catch (error) {
       throw new Error(`Failed to deactivate user: ${error.message}`);
     }

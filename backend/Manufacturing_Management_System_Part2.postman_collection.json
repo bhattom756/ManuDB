@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "manufacturing-management-system-api-part2",
-		"name": "Manufacturing Management System API - Part 2 (Clean & Role-Based)",
-		"description": "Clean, streamlined endpoints for BOMs, Manufacturing Orders, Work Orders, and Stock Ledger with role-based access",
+		"name": "Manufacturing Management System API - Part 2 (Advanced Features)",
+		"description": "Advanced endpoints for BOMs, Manufacturing Orders, Work Orders, and Stock Ledger with complete parameters and role-based access",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"auth": {
@@ -37,9 +37,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/boms?page=1&limit=10",
+							"raw": "{{base_url}}/api/boms?page=1&limit=10&search=&productId=",
 							"host": ["{{base_url}}"],
-							"path": ["boms"],
+							"path": ["api", "boms"],
 							"query": [
 								{
 									"key": "page",
@@ -48,6 +48,14 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "productId",
+									"value": ""
 								}
 							]
 						}
@@ -61,7 +69,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/1",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "1"]
+							"path": ["api", "boms", "1"]
 						}
 					}
 				},
@@ -73,12 +81,24 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/product/6",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "product", "6"]
+							"path": ["api", "boms", "product", "6"]
 						}
 					}
 				},
 				{
-					"name": "Create BOM with Work Orders",
+					"name": "Calculate BOM Cost",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/1/cost",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1", "cost"]
+						}
+					}
+				},
+				{
+					"name": "Create BOM",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -89,12 +109,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productId\": 6,\n  \"reference\": \"BOM-WIDGET-A-001\",\n  \"version\": \"1.0\",\n  \"components\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2,\n      \"unit\": \"KG\",\n      \"cost\": 5.50\n    },\n    {\n      \"productId\": 4,\n      \"quantity\": 1,\n      \"unit\": \"PCS\",\n      \"cost\": 45.00\n    },\n    {\n      \"productId\": 3,\n      \"quantity\": 1,\n      \"unit\": \"PCS\",\n      \"cost\": 25.00\n    }\n  ],\n  \"workOrders\": [\n    {\n      \"workCenterId\": 1,\n      \"operationName\": \"Assembly\",\n      \"expectedDuration\": 120,\n      \"sequence\": 1\n    },\n    {\n      \"workCenterId\": 2,\n      \"operationName\": \"Quality Check\",\n      \"expectedDuration\": 30,\n      \"sequence\": 2\n    },\n    {\n      \"workCenterId\": 3,\n      \"operationName\": \"Packaging\",\n      \"expectedDuration\": 45,\n      \"sequence\": 3\n    }\n  ]\n}"
+							"raw": "{\n  \"productId\": 6,\n  \"reference\": \"BOM-WIDGET-A-001\",\n  \"version\": \"1.0\",\n  \"isActive\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/boms",
 							"host": ["{{base_url}}"],
-							"path": ["boms"]
+							"path": ["api", "boms"]
 						}
 					}
 				},
@@ -115,19 +135,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/1",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "1"]
-						}
-					}
-				},
-				{
-					"name": "Calculate BOM Cost",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/boms/1/cost",
-							"host": ["{{base_url}}"],
-							"path": ["boms", "1", "cost"]
+							"path": ["api", "boms", "1"]
 						}
 					}
 				},
@@ -143,12 +151,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productId\": 2,\n  \"quantity\": 1,\n  \"unit\": \"M2\",\n  \"cost\": 12.00\n}"
+							"raw": "{\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"unit\": \"KG\",\n  \"cost\": 5.50\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/boms/1/components",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "1", "components"]
+							"path": ["api", "boms", "1", "components"]
 						}
 					}
 				},
@@ -169,7 +177,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/components/1",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "components", "1"]
+							"path": ["api", "boms", "components", "1"]
 						}
 					}
 				},
@@ -181,61 +189,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/components/1",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "components", "1"]
-						}
-					}
-				},
-				{
-					"name": "Link BOM to Manufacturing Order",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"manufacturingOrderId\": 1,\n  \"bomId\": 1\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/boms/1/link-manufacturing-order",
-							"host": ["{{base_url}}"],
-							"path": ["boms", "1", "link-manufacturing-order"]
-						}
-					}
-				},
-				{
-					"name": "Get BOM Work Orders",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/boms/1/work-orders",
-							"host": ["{{base_url}}"],
-							"path": ["boms", "1", "work-orders"]
-						}
-					}
-				},
-				{
-					"name": "Add BOM Work Order",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"workCenterId\": 4,\n  \"operationName\": \"Final Inspection\",\n  \"expectedDuration\": 20,\n  \"sequence\": 4\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/boms/1/work-orders",
-							"host": ["{{base_url}}"],
-							"path": ["boms", "1", "work-orders"]
+							"path": ["api", "boms", "components", "1"]
 						}
 					}
 				},
@@ -247,7 +201,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/boms/1",
 							"host": ["{{base_url}}"],
-							"path": ["boms", "1"]
+							"path": ["api", "boms", "1"]
 						}
 					}
 				}
@@ -262,9 +216,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/manufacturing-orders?page=1&limit=10",
+							"raw": "{{base_url}}/api/manufacturing-orders?page=1&limit=10&search=&status=&assigneeId=",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders"],
+							"path": ["api", "manufacturing-orders"],
 							"query": [
 								{
 									"key": "page",
@@ -273,6 +227,18 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "assigneeId",
+									"value": ""
 								}
 							]
 						}
@@ -286,7 +252,19 @@
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1"]
+							"path": ["api", "manufacturing-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Manufacturing Order Dashboard Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/dashboard/summary",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "dashboard", "summary"]
 						}
 					}
 				},
@@ -302,12 +280,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"finishedProductId\": 6,\n  \"quantity\": 50,\n  \"scheduleDate\": \"2025-09-25T00:00:00.000Z\",\n  \"billOfMaterialId\": 1,\n  \"assigneeId\": 2\n}"
+							"raw": "{\n  \"finishedProductId\": 6,\n  \"quantity\": 50,\n  \"scheduleDate\": \"2025-09-25T00:00:00.000Z\",\n  \"startDate\": \"2025-09-25T08:00:00.000Z\",\n  \"endDate\": \"2025-09-25T17:00:00.000Z\",\n  \"billOfMaterialId\": 1,\n  \"assigneeId\": 2\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders"]
+							"path": ["api", "manufacturing-orders"]
 						}
 					}
 				},
@@ -323,12 +301,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"quantity\": 75,\n  \"scheduleDate\": \"2025-09-26T00:00:00.000Z\"\n}"
+							"raw": "{\n  \"quantity\": 75,\n  \"scheduleDate\": \"2025-09-26T00:00:00.000Z\",\n  \"startDate\": \"2025-09-26T08:00:00.000Z\",\n  \"endDate\": \"2025-09-26T17:00:00.000Z\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1"]
+							"path": ["api", "manufacturing-orders", "1"]
 						}
 					}
 				},
@@ -349,7 +327,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1", "status"]
+							"path": ["api", "manufacturing-orders", "1", "status"]
 						}
 					}
 				},
@@ -370,7 +348,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1", "status"]
+							"path": ["api", "manufacturing-orders", "1", "status"]
 						}
 					}
 				},
@@ -391,7 +369,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1", "status"]
+							"path": ["api", "manufacturing-orders", "1", "status"]
 						}
 					}
 				},
@@ -403,7 +381,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/manufacturing-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["manufacturing-orders", "1"]
+							"path": ["api", "manufacturing-orders", "1"]
 						}
 					}
 				}
@@ -418,9 +396,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/work-orders?page=1&limit=10",
+							"raw": "{{base_url}}/api/work-orders?page=1&limit=10&search=&status=&assignedToId=&moId=",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders"],
+							"path": ["api", "work-orders"],
 							"query": [
 								{
 									"key": "page",
@@ -429,6 +407,22 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "assignedToId",
+									"value": ""
+								},
+								{
+									"key": "moId",
+									"value": ""
 								}
 							]
 						}
@@ -442,7 +436,19 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1"]
+							"path": ["api", "work-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "details"]
 						}
 					}
 				},
@@ -463,7 +469,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders"]
+							"path": ["api", "work-orders"]
 						}
 					}
 				},
@@ -484,7 +490,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders"]
+							"path": ["api", "work-orders"]
 						}
 					}
 				},
@@ -505,7 +511,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders"]
+							"path": ["api", "work-orders"]
 						}
 					}
 				},
@@ -526,7 +532,28 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1"]
+							"path": ["api", "work-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Work Order Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "status"]
 						}
 					}
 				},
@@ -547,7 +574,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/start",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "start"]
+							"path": ["api", "work-orders", "1", "start"]
 						}
 					}
 				},
@@ -568,7 +595,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/pause",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "pause"]
+							"path": ["api", "work-orders", "1", "pause"]
 						}
 					}
 				},
@@ -589,7 +616,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/complete",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "complete"]
+							"path": ["api", "work-orders", "1", "complete"]
 						}
 					}
 				},
@@ -610,7 +637,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/comments",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "comments"]
+							"path": ["api", "work-orders", "1", "comments"]
 						}
 					}
 				},
@@ -622,7 +649,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/comments",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "comments"]
+							"path": ["api", "work-orders", "1", "comments"]
 						}
 					}
 				},
@@ -643,7 +670,61 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1/issues",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1", "issues"]
+							"path": ["api", "work-orders", "1", "issues"]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order Issues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues"]
+						}
+					}
+				},
+				{
+					"name": "Update Issue Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Issue",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resolution\": \"Machine repaired and tested\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues/1/resolve",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues", "1", "resolve"]
 						}
 					}
 				},
@@ -655,7 +736,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/work-orders/1",
 							"host": ["{{base_url}}"],
-							"path": ["work-orders", "1"]
+							"path": ["api", "work-orders", "1"]
 						}
 					}
 				}
@@ -670,9 +751,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/stock-ledger?page=1&limit=10",
+							"raw": "{{base_url}}/api/stock-ledger?page=1&limit=10&search=&productId=&transactionType=&startDate=&endDate=",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger"],
+							"path": ["api", "stock-ledger"],
 							"query": [
 								{
 									"key": "page",
@@ -681,6 +762,26 @@
 								{
 									"key": "limit",
 									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "productId",
+									"value": ""
+								},
+								{
+									"key": "transactionType",
+									"value": ""
+								},
+								{
+									"key": "startDate",
+									"value": ""
+								},
+								{
+									"key": "endDate",
+									"value": ""
 								}
 							]
 						}
@@ -694,7 +795,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/stocks",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "stocks"]
+							"path": ["api", "stock-ledger", "stocks"]
 						}
 					}
 				},
@@ -706,7 +807,19 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/summary",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "summary"]
+							"path": ["api", "stock-ledger", "summary"]
+						}
+					}
+				},
+				{
+					"name": "Get Transaction Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/meta/transaction-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "meta", "transaction-types"]
 						}
 					}
 				},
@@ -718,7 +831,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/1",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "1"]
+							"path": ["api", "stock-ledger", "1"]
 						}
 					}
 				},
@@ -730,7 +843,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/product/1/stock",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "product", "1", "stock"]
+							"path": ["api", "stock-ledger", "product", "1", "stock"]
 						}
 					}
 				},
@@ -742,7 +855,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/product/1/movements?startDate=2025-09-01&endDate=2025-09-30",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "product", "1", "movements"],
+							"path": ["api", "stock-ledger", "product", "1", "movements"],
 							"query": [
 								{
 									"key": "startDate",
@@ -768,12 +881,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"IN\",\n  \"quantity\": 1000,\n  \"unitCost\": 5.50,\n  \"reference\": \"INITIAL_STOCK\"\n}"
+							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"IN\",\n  \"quantity\": 1000,\n  \"unitCost\": 5.50,\n  \"reference\": \"INITIAL_STOCK\",\n  \"referenceId\": null\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger"]
+							"path": ["api", "stock-ledger"]
 						}
 					}
 				},
@@ -789,12 +902,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"OUT\",\n  \"quantity\": 100,\n  \"unitCost\": 5.50,\n  \"reference\": \"MO20250920001\"\n}"
+							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"OUT\",\n  \"quantity\": 100,\n  \"unitCost\": 5.50,\n  \"reference\": \"MO20250920001\",\n  \"referenceId\": 1\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger"]
+							"path": ["api", "stock-ledger"]
 						}
 					}
 				},
@@ -815,7 +928,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/product/1/adjust",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "product", "1", "adjust"]
+							"path": ["api", "stock-ledger", "product", "1", "adjust"]
 						}
 					}
 				},
@@ -836,43 +949,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/1",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "1"]
-						}
-					}
-				},
-				{
-					"name": "Get Low Stock Alerts",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/stock-ledger/alerts/low-stock",
-							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "alerts", "low-stock"]
-						}
-					}
-				},
-				{
-					"name": "Get Stock Valuation",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/stock-ledger/valuation",
-							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "valuation"]
-						}
-					}
-				},
-				{
-					"name": "Get Transaction Types",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/stock-ledger/meta/transaction-types",
-							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "meta", "transaction-types"]
+							"path": ["api", "stock-ledger", "1"]
 						}
 					}
 				},
@@ -884,7 +961,7 @@
 						"url": {
 							"raw": "{{base_url}}/api/stock-ledger/1",
 							"host": ["{{base_url}}"],
-							"path": ["stock-ledger", "1"]
+							"path": ["api", "stock-ledger", "1"]
 						}
 					}
 				}

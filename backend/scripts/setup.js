@@ -1,7 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
+const db = require('../src/config/database');
 const bcrypt = require('bcryptjs');
-
-const prisma = new PrismaClient();
 
 async function setupDatabase() {
   try {
@@ -10,26 +8,25 @@ async function setupDatabase() {
     // Create default admin user
     console.log('👤 Creating default admin user...');
     
-    const existingAdmin = await prisma.user.findUnique({
-      where: { email: 'heet111@gmail.com' }
-    });
+    const existingAdminResult = await db.query(
+      'SELECT id FROM users WHERE email = $1',
+      ['heet111@gmail.com']
+    );
 
-    if (existingAdmin) {
+    if (existingAdminResult.rows.length > 0) {
       console.log('✅ Default admin user already exists');
     } else {
       const saltRounds = 12;
       const passwordHash = await bcrypt.hash('Admin@1234', saltRounds);
 
-      const admin = await prisma.user.create({
-        data: {
-          name: 'Business Owner',
-          email: 'heet111@gmail.com',
-          passwordHash,
-          mobileNo: '1234567890',
-          role: 'BUSINESS_OWNER'
-        }
-      });
+      const adminResult = await db.query(
+        `INSERT INTO users (name, email, password_hash, mobile_no, role)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING *`,
+        ['Business Owner', 'heet111@gmail.com', passwordHash, '1234567890', 'BUSINESS_OWNER']
+      );
 
+      const admin = adminResult.rows[0];
       console.log('✅ Default business owner created successfully');
       console.log(`   Email: ${admin.email}`);
       console.log(`   Role: ${admin.role}`);
@@ -63,21 +60,20 @@ async function setupDatabase() {
     ];
 
     for (const userData of sampleUsers) {
-      const existingUser = await prisma.user.findUnique({
-        where: { email: userData.email }
-      });
+      const existingUserResult = await db.query(
+        'SELECT id FROM users WHERE email = $1',
+        [userData.email]
+      );
 
-      if (!existingUser) {
+      if (existingUserResult.rows.length === 0) {
         const userPasswordHash = await bcrypt.hash(userData.password, 12);
-        const user = await prisma.user.create({
-          data: {
-            name: userData.name,
-            email: userData.email,
-            passwordHash: userPasswordHash,
-            mobileNo: userData.mobileNo,
-            role: userData.role
-          }
-        });
+        const userResult = await db.query(
+          `INSERT INTO users (name, email, password_hash, mobile_no, role)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING *`,
+          [userData.name, userData.email, userPasswordHash, userData.mobileNo, userData.role]
+        );
+        const user = userResult.rows[0];
         console.log(`   ✅ Created ${userData.role}: ${user.name} (${user.email})`);
       } else {
         console.log(`   ⚠️  User already exists: ${userData.name}`);
@@ -140,15 +136,20 @@ async function setupDatabase() {
     ];
 
     for (const productData of products) {
-      const existingProduct = await prisma.product.findUnique({
-        where: { name: productData.name }
-      });
+      const existingProductResult = await db.query(
+        'SELECT id FROM products WHERE name = $1',
+        [productData.name]
+      );
 
-      if (!existingProduct) {
-        const product = await prisma.product.create({
-          data: productData
-        });
-        console.log(`   ✅ Created product: ${product.name} (Stock: ${product.currentStock})`);
+      if (existingProductResult.rows.length === 0) {
+        const productResult = await db.query(
+          `INSERT INTO products (name, type, unit_of_measure, unit_cost, current_stock)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING *`,
+          [productData.name, productData.type, productData.unitOfMeasure, productData.unitCost, productData.currentStock]
+        );
+        const product = productResult.rows[0];
+        console.log(`   ✅ Created product: ${product.name} (Stock: ${product.current_stock})`);
       } else {
         console.log(`   ⚠️  Product already exists: ${productData.name}`);
       }
@@ -179,14 +180,19 @@ async function setupDatabase() {
     ];
 
     for (const workCenterData of workCenters) {
-      const existingWorkCenter = await prisma.workCenter.findUnique({
-        where: { name: workCenterData.name }
-      });
+      const existingWorkCenterResult = await db.query(
+        'SELECT id FROM work_centers WHERE name = $1',
+        [workCenterData.name]
+      );
 
-      if (!existingWorkCenter) {
-        const workCenter = await prisma.workCenter.create({
-          data: workCenterData
-        });
+      if (existingWorkCenterResult.rows.length === 0) {
+        const workCenterResult = await db.query(
+          `INSERT INTO work_centers (name, capacity, cost_per_hour, status)
+           VALUES ($1, $2, $3, $4)
+           RETURNING *`,
+          [workCenterData.name, workCenterData.capacity, workCenterData.costPerHour, workCenterData.status]
+        );
+        const workCenter = workCenterResult.rows[0];
         console.log(`   ✅ Created work center: ${workCenter.name}`);
       } else {
         console.log(`   ⚠️  Work center already exists: ${workCenterData.name}`);
@@ -196,98 +202,67 @@ async function setupDatabase() {
     // Create sample BOMs
     console.log('📋 Creating sample BOMs...');
     
-    const finishedProducts = await prisma.product.findMany({
-      where: { type: 'FINISHED_GOOD' }
-    });
+    const finishedProductsResult = await db.query(
+      "SELECT * FROM products WHERE type = 'FINISHED_GOOD'"
+    );
+    const finishedProducts = finishedProductsResult.rows;
 
-    const rawMaterials = await prisma.product.findMany({
-      where: { type: 'RAW_MATERIAL' }
-    });
+    const rawMaterialsResult = await db.query(
+      "SELECT * FROM products WHERE type = 'RAW_MATERIAL'"
+    );
+    const rawMaterials = rawMaterialsResult.rows;
 
-    const semiFinished = await prisma.product.findMany({
-      where: { type: 'SEMI_FINISHED' }
-    });
+    const semiFinishedResult = await db.query(
+      "SELECT * FROM products WHERE type = 'SEMI_FINISHED'"
+    );
+    const semiFinished = semiFinishedResult.rows;
 
     if (finishedProducts.length >= 2 && rawMaterials.length >= 3 && semiFinished.length >= 2) {
       // Create BOM for first finished product
-      const bom1 = await prisma.bOM.create({
-        data: {
-          productId: finishedProducts[0].id,
-          reference: 'BOM-WIDGET-001',
-          version: '1.0'
-        }
-      });
+      const bom1Result = await db.query(
+        `INSERT INTO boms (product_id, reference, version)
+         VALUES ($1, $2, $3)
+         RETURNING *`,
+        [finishedProducts[0].id, 'BOM-WIDGET-001', '1.0']
+      );
+      const bom1 = bom1Result.rows[0];
 
       // Add components to BOM 1
-      await prisma.bOMComponent.createMany({
-        data: [
-          {
-            bomId: bom1.id,
-            productId: rawMaterials[0].id, // Steel Rod
-            quantity: 2,
-            unit: 'KG',
-            cost: rawMaterials[0].unitCost,
-            total: 2 * rawMaterials[0].unitCost
-          },
-          {
-            bomId: bom1.id,
-            productId: semiFinished[0].id, // Steel Frame
-            quantity: 1,
-            unit: 'PCS',
-            cost: semiFinished[0].unitCost,
-            total: semiFinished[0].unitCost
-          },
-          {
-            bomId: bom1.id,
-            productId: rawMaterials[2].id, // Electronic Component
-            quantity: 1,
-            unit: 'PCS',
-            cost: rawMaterials[2].unitCost,
-            total: rawMaterials[2].unitCost
-          }
+      await db.query(
+        `INSERT INTO bom_components (bom_id, product_id, quantity, unit, cost, total)
+         VALUES ($1, $2, $3, $4, $5, $6),
+                ($7, $8, $9, $10, $11, $12),
+                ($13, $14, $15, $16, $17, $18)`,
+        [
+          bom1.id, rawMaterials[0].id, 2, 'KG', rawMaterials[0].unit_cost, 2 * rawMaterials[0].unit_cost,
+          bom1.id, semiFinished[0].id, 1, 'PCS', semiFinished[0].unit_cost, semiFinished[0].unit_cost,
+          bom1.id, rawMaterials[2].id, 1, 'PCS', rawMaterials[2].unit_cost, rawMaterials[2].unit_cost
         ]
-      });
+      );
 
       console.log(`   ✅ Created BOM for ${finishedProducts[0].name}`);
 
       // Create BOM for second finished product
-      const bom2 = await prisma.bOM.create({
-        data: {
-          productId: finishedProducts[1].id,
-          reference: 'BOM-DEVICE-001',
-          version: '1.0'
-        }
-      });
+      const bom2Result = await db.query(
+        `INSERT INTO boms (product_id, reference, version)
+         VALUES ($1, $2, $3)
+         RETURNING *`,
+        [finishedProducts[1].id, 'BOM-DEVICE-001', '1.0']
+      );
+      const bom2 = bom2Result.rows[0];
 
       // Add components to BOM 2
-      await prisma.bOMComponent.createMany({
-        data: [
-          {
-            bomId: bom2.id,
-            productId: rawMaterials[1].id, // Plastic Sheet
-            quantity: 1,
-            unit: 'M2',
-            cost: rawMaterials[1].unitCost,
-            total: rawMaterials[1].unitCost
-          },
-          {
-            bomId: bom2.id,
-            productId: semiFinished[1].id, // Plastic Housing
-            quantity: 1,
-            unit: 'PCS',
-            cost: semiFinished[1].unitCost,
-            total: semiFinished[1].unitCost
-          },
-          {
-            bomId: bom2.id,
-            productId: rawMaterials[2].id, // Electronic Component
-            quantity: 2,
-            unit: 'PCS',
-            cost: rawMaterials[2].unitCost,
-            total: 2 * rawMaterials[2].unitCost
-          }
+      await db.query(
+        `INSERT INTO bom_components (bom_id, product_id, quantity, unit, cost, total)
+         VALUES ($1, $2, $3, $4, $5, $6),
+                ($7, $8, $9, $10, $11, $12),
+                ($13, $14, $15, $16, $17, $18)`,
+        [
+          bom2.id, rawMaterials[1].id, 1, 'M2', rawMaterials[1].unit_cost, rawMaterials[1].unit_cost,
+          bom2.id, semiFinished[1].id, 1, 'PCS', semiFinished[1].unit_cost, semiFinished[1].unit_cost,
+          bom2.id, rawMaterials[2].id, 2, 'PCS', rawMaterials[2].unit_cost, 2 * rawMaterials[2].unit_cost
         ]
-      });
+      );
 
       console.log(`   ✅ Created BOM for ${finishedProducts[1].name}`);
     }
@@ -295,32 +270,25 @@ async function setupDatabase() {
     // Create initial stock ledger entries
     console.log('📊 Creating initial stock ledger entries...');
     
-    const rawMaterials = await prisma.product.findMany({
-      where: { type: 'RAW_MATERIAL' }
-    });
+    const rawMaterialsForStock = await db.query(
+      "SELECT * FROM products WHERE type = 'RAW_MATERIAL'"
+    );
 
-    for (const product of rawMaterials) {
+    for (const product of rawMaterialsForStock.rows) {
       // Check if stock ledger already exists
-      const existingStock = await prisma.stockLedger.findFirst({
-        where: {
-          productId: product.id,
-          reference: 'INITIAL_STOCK'
-        }
-      });
+      const existingStockResult = await db.query(
+        'SELECT id FROM stock_ledger WHERE product_id = $1 AND reference = $2',
+        [product.id, 'INITIAL_STOCK']
+      );
 
-      if (!existingStock) {
-        await prisma.stockLedger.create({
-          data: {
-            productId: product.id,
-            transactionType: 'IN',
-            quantity: product.currentStock,
-            unitCost: product.unitCost,
-            totalValue: product.currentStock * product.unitCost,
-            reference: 'INITIAL_STOCK'
-          }
-        });
+      if (existingStockResult.rows.length === 0) {
+        await db.query(
+          `INSERT INTO stock_ledger (product_id, transaction_type, quantity, unit_cost, total_value, reference)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [product.id, 'IN', product.current_stock, product.unit_cost, product.current_stock * product.unit_cost, 'INITIAL_STOCK']
+        );
 
-        console.log(`   ✅ Created initial stock entry for ${product.name}: ${product.currentStock} ${product.unitOfMeasure}`);
+        console.log(`   ✅ Created initial stock entry for ${product.name}: ${product.current_stock} ${product.unit_of_measure}`);
       } else {
         console.log(`   ⚠️  Initial stock already exists for ${product.name}`);
       }
@@ -342,7 +310,7 @@ async function setupDatabase() {
     console.error('❌ Setup failed:', error);
     throw error;
   } finally {
-    await prisma.$disconnect();
+    await db.close();
   }
 }
 

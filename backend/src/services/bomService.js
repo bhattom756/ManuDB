@@ -1,4 +1,4 @@
-const prisma = require('../config/database');
+const db = require('../config/database');
 
 class BOMService {
   async createBOM(data) {
