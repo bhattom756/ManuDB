@@ -5,6 +5,10 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import { AuthProvider } from './context/AuthContext'
+import WorkOrders from './pages/WorkOrders'
+import Bill from './pages/Bill'
+import WorkCenter from './pages/WorkCenter'
+import StockLedger from './pages/StockLedger'
 
 const App = () => {
   return (
@@ -16,6 +20,10 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/workorders" element={<WorkOrders />} />
+            <Route path="/bill" element={<Bill />} />
+            <Route path="/workcenter" element={<WorkCenter />} />
+            <Route path="/stockledger" element={<StockLedger />} />
           </Routes>
           <Toaster 
             position="top-right"
