@@ -116,8 +116,8 @@ const WorkOrdersAnalysis = () => {
                 </svg> */}
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Work Orders Analysis</h1>
               </div>
-            </div>
-
+      </div>
+      
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -132,20 +132,20 @@ const WorkOrdersAnalysis = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-80"
                 />
-              </div>
-
+        </div>
+        
               {(searchTerm || Object.values(searchFilters).some(filter => filter)) && (
                 <button
                   onClick={clearFilters}
                   className="text-sm text-gray-500 hover:text-gray-700 underline"
                 >
                   Clear Filters
-                </button>
+          </button>
               )}
             </div>
           </div>
         </div>
-
+        
         {/* Advanced Search Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Advanced Search Filters</h3>
@@ -184,7 +184,7 @@ const WorkOrdersAnalysis = () => {
             </div>
           </div>
         </div>
-
+        
         {/* Work Orders Analysis Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
@@ -232,7 +232,7 @@ const WorkOrdersAnalysis = () => {
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z" />
                               </svg>
-                            </button>
+          </button>
                           )}
                         </div>
                       </td>
@@ -285,7 +285,7 @@ const WorkOrdersAnalysis = () => {
             </table>
           </div>
         </div>
-
+        
         {/* Analysis Summary Cards */}
         {filteredWorkOrders.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6">
@@ -335,8 +335,8 @@ const WorkOrdersAnalysis = () => {
                   <p className="text-2xl font-semibold text-gray-900">{totals.realDuration}</p>
                 </div>
               </div>
-            </div>
-
+        </div>
+        
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
