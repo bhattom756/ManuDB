@@ -1,16 +1,8 @@
-require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const { withAccelerate } = require('@prisma/extension-accelerate');
 
-const globalForPrisma = globalThis;
-
-const prisma = globalForPrisma.prisma || new PrismaClient({
+const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
-}).$extends(withAccelerate());
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+});
 
 // Handle graceful shutdown
 process.on('beforeExit', async () => {
