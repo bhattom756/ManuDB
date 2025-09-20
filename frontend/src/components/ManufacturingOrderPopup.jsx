@@ -138,17 +138,17 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
     <>
       {/* Blur Overlay */}
       <div 
-        className="fixed inset-0 backdrop-blur-sm bg-black/20 z-40"
+        className="fixed inset-0 backdrop-blur-sm bg-black/20 dark:bg-black/40 z-40"
         onClick={onClose}
       />
       
       {/* Manufacturing Order Popup */}
-      <div className="fixed inset-4 bg-white rounded-lg shadow-2xl z-50 overflow-hidden">
+      <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-lg shadow-2xl z-50 overflow-hidden">
         {/* Header Section */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           {/* Left side - Title */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Manufacturing Order
             </h1>
           </div>
@@ -157,20 +157,20 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
           <div className="flex items-center space-x-3">
             {activeStatus === 'Confirmed' ? (
               <>
-                <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2">
+                <Button className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white px-4 py-2">
                   Produce
                 </Button>
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2">
+                <Button className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-2">
                   Start
                 </Button>
-                <Button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2">
+                <Button className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white px-4 py-2">
                   Cancel
                 </Button>
               </>
             ) : (
               <Button 
                 onClick={handleConfirm}
-                className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2"
+                className="bg-pink-500 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700 text-white px-6 py-2"
               >
                 Confirm
               </Button>
@@ -178,7 +178,7 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
             <Button 
               onClick={handleBack}
               variant="outline"
-              className="border-gray-300 hover:bg-gray-100 px-6 py-2"
+              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2"
             >
               Back
             </Button>
@@ -189,15 +189,15 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex border-b border-gray-200 bg-white">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           {statusTabs.map((status) => (
             <button
               key={status}
               onClick={() => setActiveStatus(status)}
               className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
                 activeStatus === status
-                  ? 'bg-pink-100 text-pink-600 border-pink-500'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-transparent'
+                  ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 border-pink-500'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
               }`}
             >
               {status}
@@ -206,28 +206,28 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
         </div>
 
         {/* Main Content */}
-        <div className="p-6 bg-gray-50 h-full overflow-y-auto">
+        <div className="p-6 bg-gray-50 dark:bg-gray-900 h-full overflow-y-auto">
           {/* Order Details Section */}
-          <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Order Identification & Product Details */}
               <div className="space-y-6">
                 {/* Order Number */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Order Number
                   </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 bg-gray-50">
-                    <span className="text-gray-900 font-mono text-lg">{formData.orderId}</span>
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700">
+                    <span className="text-gray-900 dark:text-white font-mono text-lg">{formData.orderId}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Always auto generate, when clicked on new and number should follow the sequence
                   </p>
                 </div>
 
                 {/* Finished Product */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Finished product *
                   </Label>
                   <Input
@@ -235,16 +235,16 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                     placeholder="Select finished product"
                     value={formData.finishedProduct}
                     onChange={(e) => handleInputChange('finishedProduct', e.target.value)}
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Drop Down, many2one field, selection should be from product master.
                   </p>
                 </div>
 
                 {/* Quantity */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Quantity *
                   </Label>
                   <div className="flex items-center space-x-2">
@@ -255,13 +255,13 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                       onChange={(e) => handleInputChange('quantity', e.target.value)}
                       className="flex-1"
                     />
-                    <span className="text-gray-700 font-medium">Units</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">Units</span>
                   </div>
                 </div>
 
                 {/* Bill of Material */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Bill of Material
                   </Label>
                   <Input
@@ -269,9 +269,9 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                     placeholder="Select bill of material"
                     value={formData.billOfMaterial}
                     onChange={(e) => handleInputChange('billOfMaterial', e.target.value)}
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Non Mandatory Field Drop Down, many2one Field, selection should be from Bill of materials master. 
                     If bill of material is selected first, it should auto populate the finished product, quantity, 
                     components and work orders based on bill of material selected.
@@ -283,23 +283,23 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
               <div className="space-y-6">
                 {/* Schedule Date */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Schedule Date *
                   </Label>
                   <Input
                     type="date"
                     value={formData.scheduleDate}
                     onChange={(e) => handleInputChange('scheduleDate', e.target.value)}
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Open calendar to allow user to select date
                   </p>
                 </div>
 
                 {/* Assignee */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Assignee
                   </Label>
                   <Input
@@ -307,9 +307,9 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                     placeholder="Select assignee"
                     value={formData.assignee}
                     onChange={(e) => handleInputChange('assignee', e.target.value)}
-                    className="w-full"
+                    className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Drop down of user for selection, many2one field
                   </p>
                 </div>
@@ -318,15 +318,15 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
           </div>
 
           {/* Components and Work Orders Section */}
-          <div className="bg-white rounded-lg shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setActiveTab('components')}
                 className={`px-6 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'components'
-                    ? 'text-pink-600 border-b-2 border-pink-500 bg-pink-50'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-500 bg-pink-50 dark:bg-pink-900/30'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 Components
@@ -335,8 +335,8 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                 onClick={() => setActiveTab('workorders')}
                 className={`px-6 py-3 text-sm font-medium transition-colors ${
                   activeTab === 'workorders'
-                    ? 'text-pink-600 border-b-2 border-pink-500 bg-pink-50'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-500 bg-pink-50 dark:bg-pink-900/30'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 Work Orders
@@ -348,7 +348,7 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
               {activeTab === 'components' ? (
                 <div>
                   {/* Components Table Header */}
-                  <div className="grid grid-cols-4 gap-4 mb-4 text-sm font-medium text-gray-700 border-b border-gray-200 pb-3">
+                  <div className="grid grid-cols-4 gap-4 mb-4 text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-3">
                     <div>Components</div>
                     <div>Availability</div>
                     <div>To Consume</div>
@@ -357,7 +357,7 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
 
                   {/* Add Product Button */}
                   <div className="mb-4">
-                    <button className="text-pink-500 hover:text-pink-600 text-sm font-medium border border-pink-200 rounded px-3 py-1 hover:bg-pink-50">
+                    <button className="text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 text-sm font-medium border border-pink-200 dark:border-pink-700 rounded px-3 py-1 hover:bg-pink-50 dark:hover:bg-pink-900/30">
                       Add a product
                     </button>
                   </div>
@@ -365,10 +365,10 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                   {/* Empty Rows */}
                   {Array.from({ length: 3 }).map((_, index) => (
                     <div key={index} className="grid grid-cols-4 gap-4 mb-3">
-                      <div className="border-b border-gray-200 h-10"></div>
-                      <div className="border-b border-gray-200 h-10"></div>
-                      <div className="border-b border-gray-200 h-10"></div>
-                      <div className="border-b border-gray-200 h-10"></div>
+                      <div className="border-b border-gray-200 dark:border-gray-700 h-10"></div>
+                      <div className="border-b border-gray-200 dark:border-gray-700 h-10"></div>
+                      <div className="border-b border-gray-200 dark:border-gray-700 h-10"></div>
+                      <div className="border-b border-gray-200 dark:border-gray-700 h-10"></div>
                     </div>
                   ))}
                 </div>
@@ -377,30 +377,30 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                   {/* Work Orders Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[800px]">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Operations</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Real Duration</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Operations</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Work Center</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Duration</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Real Duration</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {workOrders.map((order) => (
-                          <tr key={order.id} className="hover:bg-gray-50">
+                          <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-4 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{order.operation}</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{order.operation}</div>
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{order.workCenter}</div>
+                              <div className="text-sm text-gray-900 dark:text-white">{order.workCenter}</div>
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{order.duration}</div>
+                              <div className="text-sm text-gray-900 dark:text-white">{order.duration}</div>
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
                               <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-900">{order.realDuration}</span>
+                                <span className="text-sm text-gray-900 dark:text-white">{order.realDuration}</span>
                                 {order.status === 'To Do' && (
                                   <button
                                     onClick={() => startTimer(order.id)}
@@ -459,19 +459,19 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                   </div>
 
                   {/* Add a line button */}
-                  <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
+                  <div className="mt-4 pt-4 border-t border-dashed border-gray-300 dark:border-gray-600">
                     <button 
                       onClick={addWorkOrderLine}
-                      className="text-pink-500 hover:text-pink-600 text-sm font-medium"
+                      className="text-pink-500 hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300 text-sm font-medium"
                     >
                       Add a line
                     </button>
                   </div>
 
                   {/* Legend */}
-                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Timer and Status Controls:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+                  <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Timer and Status Controls:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-400">
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
@@ -509,9 +509,9 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                       {/* <h5 className="text-xs font-semibold text-gray-700 mb-2">Status Definitions:</h5> */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600 dark:text-gray-400">
                         <div><strong>To Do:</strong> When Operation is not yet started</div>
                         <div><strong>In-progress:</strong> When Operation real duration value is more than 1sec and not yet marked as done</div>
                         <div><strong>Done:</strong> When Done is clicked</div>

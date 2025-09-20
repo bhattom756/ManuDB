@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import ManufacturingOrders from './pages/ManufacturingOrders'
 import WorkOrders from './pages/WorkOrders'
 import Bill from './pages/Bill'
@@ -39,13 +40,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <Dashboard />
             </div>
           </SidebarInset>
@@ -55,13 +56,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <ManufacturingOrders />
             </div>
           </SidebarInset>
@@ -71,13 +72,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <WorkOrders />
             </div>
           </SidebarInset>
@@ -87,13 +88,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <Bill />
             </div>
           </SidebarInset>
@@ -103,13 +104,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <WorkCenter />
             </div>
           </SidebarInset>
@@ -119,13 +120,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <StockLedger />
             </div>
           </SidebarInset>
@@ -135,13 +136,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <Profile />
             </div>
           </SidebarInset>
@@ -151,13 +152,13 @@ const AppRoutes = () => {
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4">
               <SidebarTrigger className="-ml-1" />
               <div className="ml-auto">
                 <TopNavbar />
               </div>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-1 flex-col gap-4 p-4 bg-gray-50 dark:bg-gray-800">
               <Reports />
             </div>
           </SidebarInset>
@@ -169,35 +170,37 @@ const AppRoutes = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: '#4ade80',
-                secondary: '#fff',
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff',
               },
-            },
-            error: {
-              duration: 5000,
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#4ade80',
+                  secondary: '#fff',
+                },
               },
-            },
-          }}
-        />
-      </Router>
-    </AuthProvider>
+              error: {
+                duration: 5000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

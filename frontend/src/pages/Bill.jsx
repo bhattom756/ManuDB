@@ -34,14 +34,14 @@ const BillsOfMaterialsContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-4 lg:p-6 space-y-6">
         {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Bills of Materials</h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">Manage product components and manufacturing specifications</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Bills of Materials</h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm lg:text-base">Manage product components and manufacturing specifications</p>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -59,12 +59,12 @@ const BillsOfMaterialsContent = () => {
         </div>
 
         {/* Search and View Controls */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div className="flex-1 max-w-md">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -73,7 +73,7 @@ const BillsOfMaterialsContent = () => {
                   placeholder="Search by finished product..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
             </div>
@@ -82,7 +82,7 @@ const BillsOfMaterialsContent = () => {
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -102,30 +102,30 @@ const BillsOfMaterialsContent = () => {
         </div>
 
         {/* Bills of Materials Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Bills of Materials</h3>
-            <p className="text-sm text-gray-600">Manage product components and manufacturing specifications</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-4 lg:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Bills of Materials</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Manage product components and manufacturing specifications</p>
           </div>
           
           {viewMode === 'list' ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px]">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Components</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Finished Product</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reference</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Components</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredBOMs.length > 0 ? (
                     filteredBOMs.map((bom) => (
-                      <tr key={bom.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={bom.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{bom.finishedProduct}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{bom.finishedProduct}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{bom.reference}</div>
@@ -152,7 +152,7 @@ const BillsOfMaterialsContent = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
-                        <div className="text-gray-500 text-sm">
+                        <div className="text-gray-500 dark:text-gray-400 text-sm">
                           {searchTerm ? 'No bills of materials found matching your search.' : 'No bills of materials available.'}
                         </div>
                       </td>
@@ -166,33 +166,33 @@ const BillsOfMaterialsContent = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
                 {filteredBOMs.length > 0 ? (
                   filteredBOMs.map((bom) => (
-                    <div key={bom.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={bom.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="space-y-3 mb-4">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900">{bom.finishedProduct}</h4>
-                          <p className="text-sm text-gray-600">{bom.reference}</p>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{bom.finishedProduct}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{bom.reference}</p>
                         </div>
                         
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Quantity:</span>
-                          <span className="text-gray-900">{bom.quantity}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Quantity:</span>
+                          <span className="text-gray-900 dark:text-white">{bom.quantity}</span>
                         </div>
                         
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Components:</span>
-                          <span className="text-gray-900">{bom.components.length}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Components:</span>
+                          <span className="text-gray-900 dark:text-white">{bom.components.length}</span>
                         </div>
                         
                         <div className="text-sm">
-                          <span className="text-gray-500">Components:</span>
+                          <span className="text-gray-500 dark:text-gray-400">Components:</span>
                           <div className="mt-1 space-y-1">
                             {bom.components.slice(0, 2).map((component, index) => (
-                              <div key={index} className="text-xs text-gray-600">
+                              <div key={index} className="text-xs text-gray-600 dark:text-gray-300">
                                 • {component.product} ({component.quantity})
                               </div>
                             ))}
                             {bom.components.length > 2 && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
                                 +{bom.components.length - 2} more
                               </div>
                             )}
@@ -200,7 +200,7 @@ const BillsOfMaterialsContent = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                         <button 
                           onClick={() => handleEditBOM(bom)}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
@@ -227,10 +227,10 @@ const BillsOfMaterialsContent = () => {
 
         {/* Branding */}
         <div className="flex justify-between">
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Brisk Goat</span>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Beneficial Stork</span>
           </div>
         </div>

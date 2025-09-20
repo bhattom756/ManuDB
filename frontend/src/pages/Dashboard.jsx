@@ -95,33 +95,33 @@ const DashboardContent = () => {
 
   const getStateColor = (state) => {
     const colors = {
-      'Draft': 'bg-gray-100 text-gray-800',
-      'Confirmed': 'bg-blue-100 text-blue-800',
-      'In-Progress': 'bg-yellow-100 text-yellow-800',
-      'To Close': 'bg-orange-100 text-orange-800',
-      'Closed': 'bg-green-100 text-green-800'
+      'Draft': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+      'Confirmed': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+      'In-Progress': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      'To Close': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200',
+      'Closed': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
     }
-    return colors[state] || 'bg-gray-100 text-gray-800'
+    return colors[state] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
   }
 
   const getPriorityColor = (priority) => {
     const colors = {
-      'High': 'bg-red-100 text-red-800',
-      'Medium': 'bg-yellow-100 text-yellow-800',
-      'Low': 'bg-green-100 text-green-800'
+      'High': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+      'Medium': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      'Low': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
     }
-    return colors[priority] || 'bg-gray-100 text-gray-800'
+    return colors[priority] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-4 lg:p-6 space-y-6">
         {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Manufacturing Dashboard</h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">Monitor and manage your production orders</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Manufacturing Dashboard</h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm lg:text-base">Monitor and manage your production orders</p>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -138,12 +138,12 @@ const DashboardContent = () => {
             </div>
           </div>
         </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex-1 max-w-md">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -152,7 +152,7 @@ const DashboardContent = () => {
                 placeholder="Search orders, products, or materials..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ const DashboardContent = () => {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -169,7 +169,7 @@ const DashboardContent = () => {
               </button>
               <button
                 onClick={() => setViewMode('card')}
-                className={`p-2 rounded-lg ${viewMode === 'card' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`p-2 rounded-lg ${viewMode === 'card' ? 'bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -184,7 +184,7 @@ const DashboardContent = () => {
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* All Category */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 lg:mb-3">All Orders</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 lg:mb-3">All Orders</h3>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(statusCounts.All).map(([status, count]) => (
                   <button
@@ -192,7 +192,7 @@ const DashboardContent = () => {
                     className={`px-3 py-2 lg:px-4 rounded-full text-xs lg:text-sm font-medium transition-all duration-200 ${
                       selectedFilter === 'All' && selectedStatus === status
                         ? 'bg-blue-500 text-white shadow-lg' 
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
                     }`}
                     onClick={() => handleStatusFilter('All', status)}
                   >
@@ -204,7 +204,7 @@ const DashboardContent = () => {
 
             {/* My Category */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 lg:mb-3">My Orders</h3>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 lg:mb-3">My Orders</h3>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(statusCounts.My).map(([status, count]) => (
                   <button
@@ -212,7 +212,7 @@ const DashboardContent = () => {
                     className={`px-3 py-2 lg:px-4 rounded-full text-xs lg:text-sm font-medium transition-all duration-200 ${
                       selectedFilter === 'My' && selectedStatus === status
                         ? 'bg-blue-500 text-white shadow-lg' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
                     }`}
                     onClick={() => handleStatusFilter('My', status)}
                   >
@@ -226,26 +226,26 @@ const DashboardContent = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Manufacturing Orders</h3>
-          <p className="text-sm text-gray-600">Manage your production orders and track progress</p>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="px-4 lg:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Manufacturing Orders</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Manage your production orders and track progress</p>
         </div>
         
         {viewMode === 'list' ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="px-4 lg:px-6 py-3 text-left">
                     <input
                       type="checkbox"
                       checked={selectedRows.length === getFilteredOrders().length && getFilteredOrders().length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                     />
                   </th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reference</th>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -255,25 +255,25 @@ const DashboardContent = () => {
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {getFilteredOrders().map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-4 lg:px-6 py-4">
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(order.id)}
                         onChange={() => handleRowSelect(order.id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                       />
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{order.reference}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{order.reference}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.startDate}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{order.startDate}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.finishedProduct}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{order.finishedProduct}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStateColor(order.state)}`}>
@@ -286,10 +286,10 @@ const DashboardContent = () => {
                       </span>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.quantity} {order.unit}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{order.quantity} {order.unit}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.assignee || 'Unassigned'}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{order.assignee || 'Unassigned'}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex flex-col lg:flex-row gap-1 lg:gap-3">
@@ -311,13 +311,13 @@ const DashboardContent = () => {
           <div className="p-4 lg:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
               {getFilteredOrders().map((order) => (
-                <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={order.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-3">
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(order.id)}
                       onChange={() => handleRowSelect(order.id)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                     />
                     <div className="flex items-center space-x-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStateColor(order.state)}`}>
@@ -328,34 +328,34 @@ const DashboardContent = () => {
                   
                   <div className="space-y-2 mb-4">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">{order.reference}</h4>
-                      <p className="text-sm text-gray-600">{order.finishedProduct}</p>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">{order.reference}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{order.finishedProduct}</p>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Start Date:</span>
-                      <span className="text-gray-900">{order.startDate}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Start Date:</span>
+                      <span className="text-gray-900 dark:text-white">{order.startDate}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Quantity:</span>
-                      <span className="text-gray-900">{order.quantity} {order.unit}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Quantity:</span>
+                      <span className="text-gray-900 dark:text-white">{order.quantity} {order.unit}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Assignee:</span>
-                      <span className="text-gray-900">{order.assignee || 'Unassigned'}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Assignee:</span>
+                      <span className="text-gray-900 dark:text-white">{order.assignee || 'Unassigned'}</span>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Priority:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Priority:</span>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(order.priority)}`}>
                         {order.priority}
                       </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                     <button 
                       onClick={() => setManufacturingOrderOpen(true)}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
