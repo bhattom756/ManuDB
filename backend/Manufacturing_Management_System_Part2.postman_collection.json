@@ -1,0 +1,971 @@
+{
+	"info": {
+		"_postman_id": "manufacturing-management-system-api-part2",
+		"name": "Manufacturing Management System API - Part 2 (Advanced Features)",
+		"description": "Advanced endpoints for BOMs, Manufacturing Orders, Work Orders, and Stock Ledger with complete parameters and role-based access",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Bills of Materials (BOMs)",
+			"item": [
+				{
+					"name": "Get All BOMs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms?page=1&limit=10&search=&productId=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "productId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get BOM by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get BOM by Product ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/product/6",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "product", "6"]
+						}
+					}
+				},
+				{
+					"name": "Calculate BOM Cost",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/1/cost",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1", "cost"]
+						}
+					}
+				},
+				{
+					"name": "Create BOM",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 6,\n  \"reference\": \"BOM-WIDGET-A-001\",\n  \"version\": \"1.0\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/boms",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms"]
+						}
+					}
+				},
+				{
+					"name": "Update BOM",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reference\": \"BOM-WIDGET-A-001-V2\",\n  \"version\": \"2.0\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/boms/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1"]
+						}
+					}
+				},
+				{
+					"name": "Add BOM Component",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"unit\": \"KG\",\n  \"cost\": 5.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/boms/1/components",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1", "components"]
+						}
+					}
+				},
+				{
+					"name": "Update BOM Component",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 3,\n  \"unit\": \"KG\",\n  \"cost\": 6.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/boms/components/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "components", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete BOM Component",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/components/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "components", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete BOM",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/boms/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "boms", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Manufacturing Orders",
+			"item": [
+				{
+					"name": "Get All Manufacturing Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders?page=1&limit=10&search=&status=&assigneeId=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "assigneeId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Manufacturing Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Manufacturing Order Dashboard Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/dashboard/summary",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "dashboard", "summary"]
+						}
+					}
+				},
+				{
+					"name": "Create Manufacturing Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"finishedProductId\": 6,\n  \"quantity\": 50,\n  \"scheduleDate\": \"2025-09-25T00:00:00.000Z\",\n  \"startDate\": \"2025-09-25T08:00:00.000Z\",\n  \"endDate\": \"2025-09-25T17:00:00.000Z\",\n  \"billOfMaterialId\": 1,\n  \"assigneeId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders"]
+						}
+					}
+				},
+				{
+					"name": "Update Manufacturing Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 75,\n  \"scheduleDate\": \"2025-09-26T00:00:00.000Z\",\n  \"startDate\": \"2025-09-26T08:00:00.000Z\",\n  \"endDate\": \"2025-09-26T17:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Manufacturing Order Status - Confirm",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Update Manufacturing Order Status - Start",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Update Manufacturing Order Status - Complete",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CLOSED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Delete Manufacturing Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/manufacturing-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "manufacturing-orders", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Work Orders",
+			"item": [
+				{
+					"name": "Get All Work Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders?page=1&limit=10&search=&status=&assignedToId=&moId=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "assignedToId",
+									"value": ""
+								},
+								{
+									"key": "moId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "details"]
+						}
+					}
+				},
+				{
+					"name": "Create Work Order - Assembly",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"moId\": 1,\n  \"workCenterId\": 1,\n  \"operationName\": \"Assembly\",\n  \"expectedDuration\": 120,\n  \"assignedToId\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders"]
+						}
+					}
+				},
+				{
+					"name": "Create Work Order - Quality Control",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"moId\": 1,\n  \"workCenterId\": 2,\n  \"operationName\": \"Quality Inspection\",\n  \"expectedDuration\": 30,\n  \"assignedToId\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders"]
+						}
+					}
+				},
+				{
+					"name": "Create Work Order - Packaging",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"moId\": 1,\n  \"workCenterId\": 3,\n  \"operationName\": \"Packaging\",\n  \"expectedDuration\": 45,\n  \"assignedToId\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders"]
+						}
+					}
+				},
+				{
+					"name": "Update Work Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"operationName\": \"Updated Assembly Process\",\n  \"expectedDuration\": 150,\n  \"assignedToId\": 4\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Work Order Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Start Work Order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/start",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "start"]
+						}
+					}
+				},
+				{
+					"name": "Pause Work Order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Paused due to material shortage\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/pause",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "pause"]
+						}
+					}
+				},
+				{
+					"name": "Complete Work Order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"realDuration\": 135,\n  \"notes\": \"Work order completed successfully\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "complete"]
+						}
+					}
+				},
+				{
+					"name": "Add Work Order Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"comment\": \"Material quality issue detected, need replacement\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "comments"]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order Comments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "comments"]
+						}
+					}
+				},
+				{
+					"name": "Report Work Order Issue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"issueType\": \"EQUIPMENT\",\n  \"description\": \"Machine breakdown during assembly\",\n  \"severity\": \"HIGH\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues"]
+						}
+					}
+				},
+				{
+					"name": "Get Work Order Issues",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues"]
+						}
+					}
+				},
+				{
+					"name": "Update Issue Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Issue",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resolution\": \"Machine repaired and tested\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1/issues/1/resolve",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1", "issues", "1", "resolve"]
+						}
+					}
+				},
+				{
+					"name": "Delete Work Order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-orders", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Stock Ledger",
+			"item": [
+				{
+					"name": "Get All Stock Ledger Entries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger?page=1&limit=10&search=&productId=&transactionType=&startDate=&endDate=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "productId",
+									"value": ""
+								},
+								{
+									"key": "transactionType",
+									"value": ""
+								},
+								{
+									"key": "startDate",
+									"value": ""
+								},
+								{
+									"key": "endDate",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Product Stocks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/stocks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "stocks"]
+						}
+					}
+				},
+				{
+					"name": "Get Stock Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/summary",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "summary"]
+						}
+					}
+				},
+				{
+					"name": "Get Transaction Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/meta/transaction-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "meta", "transaction-types"]
+						}
+					}
+				},
+				{
+					"name": "Get Stock Ledger Entry by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Product Stock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/product/1/stock",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "product", "1", "stock"]
+						}
+					}
+				},
+				{
+					"name": "Get Stock Movements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/product/1/movements?startDate=2025-09-01&endDate=2025-09-30",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "product", "1", "movements"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-09-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-09-30"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Add Stock - IN Transaction (Initial Stock)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"IN\",\n  \"quantity\": 1000,\n  \"unitCost\": 5.50,\n  \"reference\": \"INITIAL_STOCK\",\n  \"referenceId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger"]
+						}
+					}
+				},
+				{
+					"name": "Consume Stock - OUT Transaction (Work Order)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": 1,\n  \"transactionType\": \"OUT\",\n  \"quantity\": 100,\n  \"unitCost\": 5.50,\n  \"reference\": \"MO20250920001\",\n  \"referenceId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger"]
+						}
+					}
+				},
+				{
+					"name": "Adjust Stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 150,\n  \"reason\": \"Physical count adjustment\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/product/1/adjust",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "product", "1", "adjust"]
+						}
+					}
+				},
+				{
+					"name": "Update Stock Transaction",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 1200,\n  \"unitCost\": 5.75,\n  \"reference\": \"UPDATED_STOCK\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Stock Transaction",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stock-ledger/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stock-ledger", "1"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
