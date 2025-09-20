@@ -13,6 +13,7 @@ const ManufacturingOrderPopup = ({ isOpen, onClose }) => {
     billOfMaterial: '',
     scheduleDate: '',
     assignee: ''
+                                                                                                                                                                                                                                                                                        
   })
 
   // Work Orders data
