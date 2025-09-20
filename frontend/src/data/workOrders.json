@@ -1,0 +1,124 @@
+{
+  "workOrders": [
+    {
+      "id": "WO-001",
+      "operation": "Assembly-1",
+      "workCenter": "Work Center -1",
+      "finishedProduct": "Dining Table",
+      "expectedDuration": "60:00",
+      "realDuration": "00:00",
+      "status": "To Do",
+      "isRunning": true
+    },
+    {
+      "id": "WO-002",
+      "operation": "Assembly-2",
+      "workCenter": "Work Center -2",
+      "finishedProduct": "Office Chair",
+      "expectedDuration": "45:00",
+      "realDuration": "15:30",
+      "status": "In Progress",
+      "isRunning": false
+    },
+    {
+      "id": "WO-003",
+      "operation": "Quality Check",
+      "workCenter": "Work Center -3",
+      "finishedProduct": "Drawer",
+      "expectedDuration": "30:00",
+      "realDuration": "30:00",
+      "status": "Done",
+      "isRunning": false
+    },
+    {
+      "id": "WO-004",
+      "operation": "Cutting",
+      "workCenter": "Work Center -1",
+      "finishedProduct": "Coffee Table",
+      "expectedDuration": "25:00",
+      "realDuration": "20:15",
+      "status": "In Progress",
+      "isRunning": true
+    },
+    {
+      "id": "WO-005",
+      "operation": "Sanding",
+      "workCenter": "Work Center -2",
+      "finishedProduct": "Bookshelf",
+      "expectedDuration": "40:00",
+      "realDuration": "00:00",
+      "status": "To Do",
+      "isRunning": false
+    },
+    {
+      "id": "WO-006",
+      "operation": "Painting",
+      "workCenter": "Work Center -3",
+      "finishedProduct": "Desk Lamp",
+      "expectedDuration": "35:00",
+      "realDuration": "35:00",
+      "status": "Done",
+      "isRunning": false
+    },
+    {
+      "id": "WO-007",
+      "operation": "Packaging",
+      "workCenter": "Work Center -4",
+      "finishedProduct": "Sofa",
+      "expectedDuration": "20:00",
+      "realDuration": "18:45",
+      "status": "In Progress",
+      "isRunning": true
+    },
+    {
+      "id": "WO-008",
+      "operation": "Final Inspection",
+      "workCenter": "Work Center -3",
+      "finishedProduct": "Dining Chair",
+      "expectedDuration": "15:00",
+      "realDuration": "00:00",
+      "status": "To Do",
+      "isRunning": false
+    },
+    {
+      "id": "WO-009",
+      "operation": "Hardware Installation",
+      "workCenter": "Work Center -1",
+      "finishedProduct": "Cabinet",
+      "expectedDuration": "50:00",
+      "realDuration": "50:00",
+      "status": "Done",
+      "isRunning": false
+    },
+    {
+      "id": "WO-010",
+      "operation": "Upholstery",
+      "workCenter": "Work Center -2",
+      "finishedProduct": "Bed Frame",
+      "expectedDuration": "75:00",
+      "realDuration": "00:00",
+      "status": "To Do",
+      "isRunning": false
+    },
+    {
+      "id": "WO-011",
+      "operation": "Assembly",
+      "workCenter": "Work Center -1",
+      "finishedProduct": "Nightstand",
+      "expectedDuration": "30:00",
+      "realDuration": "25:30",
+      "status": "In Progress",
+      "isRunning": true
+    },
+    {
+      "id": "WO-012",
+      "operation": "Quality Control",
+      "workCenter": "Work Center -3",
+      "finishedProduct": "Wardrobe",
+      "expectedDuration": "45:00",
+      "realDuration": "45:00",
+      "status": "Done",
+      "isRunning": false
+    }
+  ]
+}

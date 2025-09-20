@@ -1,43 +1,13 @@
 import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
+import workOrdersData from '@/data/workOrders.json'
 
 const WorkOrdersContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState('list') // 'list' or 'kanban'
+  const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
 
-  // Sample work orders data matching the wireframe
-  const workOrders = [
-    {
-      id: 'WO-001',
-      operation: 'Assembly-1',
-      workCenter: 'Work Center -1',
-      finishedProduct: 'Dining Table',
-      expectedDuration: '60:00',
-      realDuration: '00:00',
-      status: 'To Do',
-      isRunning: true
-    },
-    {
-      id: 'WO-002',
-      operation: 'Assembly-2',
-      workCenter: 'Work Center -2',
-      finishedProduct: 'Office Chair',
-      expectedDuration: '45:00',
-      realDuration: '15:30',
-      status: 'In Progress',
-      isRunning: false
-    },
-    {
-      id: 'WO-003',
-      operation: 'Quality Check',
-      workCenter: 'Work Center -3',
-      finishedProduct: 'Drawer',
-      expectedDuration: '30:00',
-      realDuration: '30:00',
-      status: 'Done',
-      isRunning: false
-    }
-  ]
+  // Use data from JSON file
+  const workOrders = workOrdersData.workOrders
 
   const getStatusColor = (status) => {
     const colors = {
@@ -90,20 +60,20 @@ const WorkOrdersContent = () => {
             </div>
             
             <div className="flex items-center space-x-2 lg:space-x-4">
-              <div className="flex items-center space-x-1 lg:space-x-2">
+              <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </button>
                 <button
-                  onClick={() => setViewMode('kanban')}
-                  className={`p-2 rounded-lg ${viewMode === 'kanban' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  onClick={() => setViewMode('card')}
+                  className={`p-2 rounded-lg ${viewMode === 'card' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
@@ -112,79 +82,134 @@ const WorkOrdersContent = () => {
           </div>
         </div>
 
-        {/* Work Orders Table */}
+        {/* Work Orders Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Work Orders</h3>
             <p className="text-sm text-gray-600">Populate all work orders added to manufacturing order</p>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                      </svg>
-                      Operation
-                    </div>
-                  </th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Duration</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Real Duration</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredWorkOrders.length > 0 ? (
-                  filteredWorkOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{order.operation}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{order.workCenter}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{order.finishedProduct}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{order.expectedDuration}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-900">{order.realDuration}</span>
-                          {order.isRunning && (
-                            <button className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
-                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            </button>
-                          )}
+          {viewMode === 'list' ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px]">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        Operation
+                      </div>
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Duration</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Real Duration</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredWorkOrders.length > 0 ? (
+                    filteredWorkOrders.map((order) => (
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{order.operation}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{order.workCenter}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{order.finishedProduct}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{order.expectedDuration}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-900">{order.realDuration}</span>
+                            {order.isRunning && (
+                              <button className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="px-4 lg:px-6 py-12 text-center">
+                        <div className="text-gray-500 text-sm">
+                          {searchTerm ? 'No work orders found matching your search.' : 'No work orders available.'}
                         </div>
                       </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
                     </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-4 lg:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                {filteredWorkOrders.length > 0 ? (
+                  filteredWorkOrders.map((order) => (
+                    <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        {order.isRunning && (
+                          <button className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900">{order.operation}</h4>
+                          <p className="text-sm text-gray-600">{order.finishedProduct}</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Work Center:</span>
+                          <span className="text-gray-900">{order.workCenter}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Expected:</span>
+                          <span className="text-gray-900">{order.expectedDuration}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Real Duration:</span>
+                          <span className="text-gray-900">{order.realDuration}</span>
+                        </div>
+                      </div>
+                    </div>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="6" className="px-4 lg:px-6 py-12 text-center">
-                      <div className="text-gray-500 text-sm">
-                        {searchTerm ? 'No work orders found matching your search.' : 'No work orders available.'}
-                      </div>
-                    </td>
-                  </tr>
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-gray-500 text-sm">
+                      {searchTerm ? 'No work orders found matching your search.' : 'No work orders available.'}
+                    </div>
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Branding */}

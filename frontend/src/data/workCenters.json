@@ -1,0 +1,44 @@
+{
+  "workCenters": [
+    {
+      "id": "WC-001",
+      "name": "Work Center -1",
+      "costPerHour": 50,
+      "description": "Main assembly line for furniture production",
+      "capacity": 8,
+      "efficiency": 95
+    },
+    {
+      "id": "WC-002",
+      "name": "Work Center -2",
+      "costPerHour": 45,
+      "description": "Quality control and finishing station",
+      "capacity": 6,
+      "efficiency": 92
+    },
+    {
+      "id": "WC-003",
+      "name": "Work Center -3",
+      "costPerHour": 60,
+      "description": "Heavy machinery and cutting operations",
+      "capacity": 4,
+      "efficiency": 88
+    },
+    {
+      "id": "WC-004",
+      "name": "Work Center -4",
+      "costPerHour": 35,
+      "description": "Packaging and shipping preparation",
+      "capacity": 10,
+      "efficiency": 98
+    },
+    {
+      "id": "WC-005",
+      "name": "Work Center -5",
+      "costPerHour": 55,
+      "description": "Painting and finishing operations",
+      "capacity": 6,
+      "efficiency": 90
+    }
+  ]
+}

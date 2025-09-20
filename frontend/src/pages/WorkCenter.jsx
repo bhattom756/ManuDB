@@ -2,48 +2,16 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import WorkCenterForm from '../components/WorkCenterForm'
+import workCentersData from '@/data/workCenters.json'
 
 const WorkCentersContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState('list') // 'list' or 'kanban'
+  const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
   const [showForm, setShowForm] = useState(false)
   const [editingWorkCenter, setEditingWorkCenter] = useState(null)
 
-  // Sample Work Centers data
-  const workCenters = [
-    {
-      id: 'WC-001',
-      name: 'Work Center -1',
-      costPerHour: 50,
-      description: 'Main assembly line for furniture production',
-      capacity: 8,
-      efficiency: 95
-    },
-    {
-      id: 'WC-002',
-      name: 'Work Center -2',
-      costPerHour: 45,
-      description: 'Quality control and finishing station',
-      capacity: 6,
-      efficiency: 92
-    },
-    {
-      id: 'WC-003',
-      name: 'Work Center -3',
-      costPerHour: 60,
-      description: 'Heavy machinery and cutting operations',
-      capacity: 4,
-      efficiency: 88
-    },
-    {
-      id: 'WC-004',
-      name: 'Work Center -4',
-      costPerHour: 35,
-      description: 'Packaging and shipping preparation',
-      capacity: 10,
-      efficiency: 98
-    }
-  ]
+  // Use data from JSON file
+  const workCenters = workCentersData.workCenters
 
   const filteredWorkCenters = workCenters.filter(center => 
     center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,20 +80,20 @@ const WorkCentersContent = () => {
             </div>
             
             <div className="flex items-center space-x-2 lg:space-x-4">
-              <div className="flex items-center space-x-1 lg:space-x-2">
+              <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </button>
                 <button
-                  onClick={() => setViewMode('kanban')}
-                  className={`p-2 rounded-lg ${viewMode === 'kanban' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  onClick={() => setViewMode('card')}
+                  className={`p-2 rounded-lg ${viewMode === 'card' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
@@ -134,79 +102,139 @@ const WorkCentersContent = () => {
           </div>
         </div>
 
-        {/* Work Centers Table */}
+        {/* Work Centers Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Work Centers</h3>
             <p className="text-sm text-gray-600">Manage work center operations and costs</p>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cost per hour
-                    <span className="block text-xs text-gray-400 font-normal mt-1">Hourly processing cost</span>
-                  </th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredWorkCenters.length > 0 ? (
-                  filteredWorkCenters.map((center) => (
-                    <tr key={center.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{center.name}</div>
-                          <div className="text-xs text-gray-500">{center.description}</div>
+          {viewMode === 'list' ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work Center</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cost per hour
+                      <span className="block text-xs text-gray-400 font-normal mt-1">Hourly processing cost</span>
+                    </th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredWorkCenters.length > 0 ? (
+                    filteredWorkCenters.map((center) => (
+                      <tr key={center.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{center.name}</div>
+                            <div className="text-xs text-gray-500">{center.description}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">${center.costPerHour}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{center.capacity} units</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="text-sm text-gray-900 mr-2">{center.efficiency}%</div>
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full" 
+                                style={{ width: `${center.efficiency}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button 
+                              onClick={() => handleEditWorkCenter(center)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Edit
+                            </button>
+                            <button className="text-red-600 hover:text-red-900">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
+                        <div className="text-gray-500 text-sm">
+                          {searchTerm ? 'No work centers found matching your search.' : 'No work centers available.'}
                         </div>
                       </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">${center.costPerHour}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{center.capacity} units</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="text-sm text-gray-900 mr-2">{center.efficiency}%</div>
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-4 lg:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                {filteredWorkCenters.length > 0 ? (
+                  filteredWorkCenters.map((center) => (
+                    <div key={center.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="space-y-3 mb-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900">{center.name}</h4>
+                          <p className="text-sm text-gray-600">{center.description}</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Cost/Hour:</span>
+                          <span className="text-gray-900">${center.costPerHour}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Capacity:</span>
+                          <span className="text-gray-900">{center.capacity} units</span>
+                        </div>
+                        
+                        <div className="text-sm">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-gray-500">Efficiency:</span>
+                            <span className="text-gray-900">{center.efficiency}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
                               className="bg-blue-600 h-2 rounded-full" 
                               style={{ width: `${center.efficiency}%` }}
                             ></div>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleEditWorkCenter(center)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Edit
-                          </button>
-                          <button className="text-red-600 hover:text-red-900">Delete</button>
-                        </div>
-                      </td>
-                    </tr>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <button 
+                          onClick={() => handleEditWorkCenter(center)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
-                      <div className="text-gray-500 text-sm">
-                        {searchTerm ? 'No work centers found matching your search.' : 'No work centers available.'}
-                      </div>
-                    </td>
-                  </tr>
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-gray-500 text-sm">
+                      {searchTerm ? 'No work centers found matching your search.' : 'No work centers available.'}
+                    </div>
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

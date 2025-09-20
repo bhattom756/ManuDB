@@ -1,0 +1,180 @@
+{
+  "stockItems": [
+    {
+      "id": "ST-001",
+      "product": "Dining table",
+      "unitCost": 1200,
+      "unit": "Unit",
+      "totalValue": 600000,
+      "onHand": 500,
+      "freeToUse": 270,
+      "incoming": 0,
+      "outgoing": 230
+    },
+    {
+      "id": "ST-002",
+      "product": "Drawer",
+      "unitCost": 100,
+      "unit": "Unit",
+      "totalValue": 2000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-003",
+      "product": "Office Chair",
+      "unitCost": 800,
+      "unit": "Unit",
+      "totalValue": 16000,
+      "onHand": 20,
+      "freeToUse": 15,
+      "incoming": 5,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-004",
+      "product": "Wood Panel",
+      "unitCost": 50,
+      "unit": "Piece",
+      "totalValue": 5000,
+      "onHand": 100,
+      "freeToUse": 80,
+      "incoming": 20,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-005",
+      "product": "Coffee Table",
+      "unitCost": 600,
+      "unit": "Unit",
+      "totalValue": 18000,
+      "onHand": 30,
+      "freeToUse": 25,
+      "incoming": 5,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-006",
+      "product": "Bookshelf",
+      "unitCost": 400,
+      "unit": "Unit",
+      "totalValue": 12000,
+      "onHand": 30,
+      "freeToUse": 28,
+      "incoming": 2,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-007",
+      "product": "Desk Lamp",
+      "unitCost": 150,
+      "unit": "Unit",
+      "totalValue": 4500,
+      "onHand": 30,
+      "freeToUse": 30,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-008",
+      "product": "Sofa",
+      "unitCost": 2500,
+      "unit": "Unit",
+      "totalValue": 50000,
+      "onHand": 20,
+      "freeToUse": 18,
+      "incoming": 2,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-009",
+      "product": "Dining Chair",
+      "unitCost": 300,
+      "unit": "Unit",
+      "totalValue": 9000,
+      "onHand": 30,
+      "freeToUse": 25,
+      "incoming": 5,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-010",
+      "product": "Cabinet",
+      "unitCost": 1800,
+      "unit": "Unit",
+      "totalValue": 36000,
+      "onHand": 20,
+      "freeToUse": 15,
+      "incoming": 5,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-011",
+      "product": "Bed Frame",
+      "unitCost": 2000,
+      "unit": "Unit",
+      "totalValue": 40000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-012",
+      "product": "Nightstand",
+      "unitCost": 350,
+      "unit": "Unit",
+      "totalValue": 7000,
+      "onHand": 20,
+      "freeToUse": 18,
+      "incoming": 2,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-013",
+      "product": "Wardrobe",
+      "unitCost": 3000,
+      "unit": "Unit",
+      "totalValue": 60000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-014",
+      "product": "TV Stand",
+      "unitCost": 500,
+      "unit": "Unit",
+      "totalValue": 10000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-015",
+      "product": "Side Table",
+      "unitCost": 250,
+      "unit": "Unit",
+      "totalValue": 5000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    },
+    {
+      "id": "ST-016",
+      "product": "Bar Stool",
+      "unitCost": 200,
+      "unit": "Unit",
+      "totalValue": 4000,
+      "onHand": 20,
+      "freeToUse": 20,
+      "incoming": 0,
+      "outgoing": 0
+    }
+  ]
+}

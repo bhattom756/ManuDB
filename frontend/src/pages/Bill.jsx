@@ -2,57 +2,16 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import BillOfMaterialsForm from '../components/BillForm'
+import billsOfMaterialsData from '@/data/billsOfMaterials.json'
 
 const BillsOfMaterialsContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState('list') // 'list' or 'kanban'
+  const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
   const [showForm, setShowForm] = useState(false)
   const [editingBOM, setEditingBOM] = useState(null)
 
-  // Sample Bills of Materials data
-  const billsOfMaterials = [
-    {
-      id: 'BOM-000001',
-      finishedProduct: 'Drawer',
-      reference: '[8001]',
-      quantity: 1,
-      components: [
-        { product: 'Wood Panel', quantity: 2 },
-        { product: 'Screws', quantity: 8 }
-      ],
-      workOrders: [
-        { operation: 'Assembly', workCenter: 'Assembly Line 1', duration: '2:00' }
-      ]
-    },
-    {
-      id: 'BOM-000002',
-      finishedProduct: 'Office Chair',
-      reference: '[8002]',
-      quantity: 1,
-      components: [
-        { product: 'Seat Cushion', quantity: 1 },
-        { product: 'Back Rest', quantity: 1 },
-        { product: 'Base Frame', quantity: 1 }
-      ],
-      workOrders: [
-        { operation: 'Assembly', workCenter: 'Assembly Line 2', duration: '3:30' }
-      ]
-    },
-    {
-      id: 'BOM-000003',
-      finishedProduct: 'Dining Table',
-      reference: '[8003]',
-      quantity: 1,
-      components: [
-        { product: 'Table Top', quantity: 1 },
-        { product: 'Table Legs', quantity: 4 },
-        { product: 'Hardware Kit', quantity: 1 }
-      ],
-      workOrders: [
-        { operation: 'Assembly', workCenter: 'Assembly Line 3', duration: '4:00' }
-      ]
-    }
-  ]
+  // Use data from JSON file
+  const billsOfMaterials = billsOfMaterialsData.billsOfMaterials
 
   const filteredBOMs = billsOfMaterials.filter(bom => 
     bom.finishedProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -120,20 +79,20 @@ const BillsOfMaterialsContent = () => {
             </div>
             
             <div className="flex items-center space-x-2 lg:space-x-4">
-              <div className="flex items-center space-x-1 lg:space-x-2">
+              <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                 </button>
                 <button
-                  onClick={() => setViewMode('kanban')}
-                  className={`p-2 rounded-lg ${viewMode === 'kanban' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                  onClick={() => setViewMode('card')}
+                  className={`p-2 rounded-lg ${viewMode === 'card' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                 </button>
@@ -142,65 +101,128 @@ const BillsOfMaterialsContent = () => {
           </div>
         </div>
 
-        {/* Bills of Materials Table */}
+        {/* Bills of Materials Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Bills of Materials</h3>
             <p className="text-sm text-gray-600">Manage product components and manufacturing specifications</p>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Components</th>
-                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBOMs.length > 0 ? (
-                  filteredBOMs.map((bom) => (
-                    <tr key={bom.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{bom.finishedProduct}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{bom.reference}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{bom.quantity}</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{bom.components.length} components</div>
-                      </td>
-                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleEditBOM(bom)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Edit
-                          </button>
-                          <button className="text-red-600 hover:text-red-900">Delete</button>
+          {viewMode === 'list' ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Components</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredBOMs.length > 0 ? (
+                    filteredBOMs.map((bom) => (
+                      <tr key={bom.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{bom.finishedProduct}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{bom.reference}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{bom.quantity}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{bom.components.length} components</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button 
+                              onClick={() => handleEditBOM(bom)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Edit
+                            </button>
+                            <button className="text-red-600 hover:text-red-900">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
+                        <div className="text-gray-500 text-sm">
+                          {searchTerm ? 'No bills of materials found matching your search.' : 'No bills of materials available.'}
                         </div>
                       </td>
                     </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-4 lg:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                {filteredBOMs.length > 0 ? (
+                  filteredBOMs.map((bom) => (
+                    <div key={bom.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="space-y-3 mb-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900">{bom.finishedProduct}</h4>
+                          <p className="text-sm text-gray-600">{bom.reference}</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Quantity:</span>
+                          <span className="text-gray-900">{bom.quantity}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Components:</span>
+                          <span className="text-gray-900">{bom.components.length}</span>
+                        </div>
+                        
+                        <div className="text-sm">
+                          <span className="text-gray-500">Components:</span>
+                          <div className="mt-1 space-y-1">
+                            {bom.components.slice(0, 2).map((component, index) => (
+                              <div key={index} className="text-xs text-gray-600">
+                                • {component.product} ({component.quantity})
+                              </div>
+                            ))}
+                            {bom.components.length > 2 && (
+                              <div className="text-xs text-gray-500">
+                                +{bom.components.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <button 
+                          onClick={() => handleEditBOM(bom)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
-                      <div className="text-gray-500 text-sm">
-                        {searchTerm ? 'No bills of materials found matching your search.' : 'No bills of materials available.'}
-                      </div>
-                    </td>
-                  </tr>
+                  <div className="col-span-full text-center py-12">
+                    <div className="text-gray-500 text-sm">
+                      {searchTerm ? 'No bills of materials found matching your search.' : 'No bills of materials available.'}
+                    </div>
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Branding */}
