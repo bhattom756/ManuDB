@@ -1,72 +1,6 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Sidebar from '@/components/Sidebar'
-import ManufacturingOrderPopup from '@/components/ManufacturingOrderPopup'
 
-export default function Dashboard() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedFilter, setSelectedFilter] = useState('All')
-  const [selectedRows, setSelectedRows] = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [manufacturingOrderOpen, setManufacturingOrderOpen] = useState(false)
-
-  // Sample data based on wireframe
-  const manufacturingOrders = [
-    {
-      id: 'MO-000001',
-      reference: 'MO-000001',
-      startDate: 'Tomorrow',
-      finishedProduct: 'Dinning Table',
-      componentStatus: 'Not Available',
-      quantity: '5.00',
-      unit: 'Units',
-      state: 'Confirmed'
-    },
-    {
-      id: 'MO-000002',
-      reference: 'MO-000002',
-      startDate: 'Yesterday',
-      finishedProduct: 'Drawer',
-      componentStatus: 'Available',
-      quantity: '2.00',
-      unit: 'Units',
-      state: 'In-Progress'
-    }
-  ]
-
-  const statusCounts = {
-    All: {
-      Draft: 2,
-      Confirmed: 7,
-      'In-Progress': 1,
-      'To Close': 5,
-      'Not Assigned': 11,
-      Late: 11
-    },
-    My: {
-      Confirmed: 7,
-      'In-Progress': 1,
-      'To Close': 5,
-      Late: 8
-    }
-  }
-
-  const handleRowSelect = (orderId) => {
-    setSelectedRows(prev => 
-      prev.includes(orderId) 
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    )
-  }
-
-  const handleSelectAll = () => {
-    setSelectedRows(
-      selectedRows.length === manufacturingOrders.length 
-        ? [] 
-        : manufacturingOrders.map(order => order.id)
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -82,30 +16,6 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Hamburger Menu */}
-            <button 
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            {/* App Logo and Name */}
-            <div className="flex items-center space-x-4">
-              <div className="text-lg font-semibold">App Logo and Name</div>
-            </div>
-
-            {/* User Profile */}
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
           </div>
         </div>
       </header>
