@@ -1,0 +1,118 @@
+{
+  "billsOfMaterials": [
+    {
+      "id": "BOM-000001",
+      "finishedProduct": "Drawer",
+      "reference": "[8001]",
+      "quantity": 1,
+      "components": [
+        { "product": "Wood Panel", "quantity": 2 },
+        { "product": "Screws", "quantity": 8 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 1", "duration": "2:00" }
+      ]
+    },
+    {
+      "id": "BOM-000002",
+      "finishedProduct": "Office Chair",
+      "reference": "[8002]",
+      "quantity": 1,
+      "components": [
+        { "product": "Seat Cushion", "quantity": 1 },
+        { "product": "Back Rest", "quantity": 1 },
+        { "product": "Base Frame", "quantity": 1 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 2", "duration": "3:30" }
+      ]
+    },
+    {
+      "id": "BOM-000003",
+      "finishedProduct": "Dining Table",
+      "reference": "[8003]",
+      "quantity": 1,
+      "components": [
+        { "product": "Table Top", "quantity": 1 },
+        { "product": "Table Legs", "quantity": 4 },
+        { "product": "Hardware Kit", "quantity": 1 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 3", "duration": "4:00" }
+      ]
+    },
+    {
+      "id": "BOM-000004",
+      "finishedProduct": "Coffee Table",
+      "reference": "[8004]",
+      "quantity": 1,
+      "components": [
+        { "product": "Glass Top", "quantity": 1 },
+        { "product": "Metal Frame", "quantity": 1 },
+        { "product": "Rubber Feet", "quantity": 4 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 1", "duration": "1:30" }
+      ]
+    },
+    {
+      "id": "BOM-000005",
+      "finishedProduct": "Bookshelf",
+      "reference": "[8005]",
+      "quantity": 1,
+      "components": [
+        { "product": "Wood Shelves", "quantity": 5 },
+        { "product": "Side Panels", "quantity": 2 },
+        { "product": "Back Panel", "quantity": 1 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 2", "duration": "2:45" }
+      ]
+    },
+    {
+      "id": "BOM-000006",
+      "finishedProduct": "Desk Lamp",
+      "reference": "[8006]",
+      "quantity": 1,
+      "components": [
+        { "product": "Lamp Base", "quantity": 1 },
+        { "product": "Lamp Shade", "quantity": 1 },
+        { "product": "Bulb", "quantity": 1 },
+        { "product": "Cord", "quantity": 1 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 3", "duration": "1:15" }
+      ]
+    },
+    {
+      "id": "BOM-000007",
+      "finishedProduct": "Sofa",
+      "reference": "[8007]",
+      "quantity": 1,
+      "components": [
+        { "product": "Frame", "quantity": 1 },
+        { "product": "Cushions", "quantity": 3 },
+        { "product": "Fabric", "quantity": 1 },
+        { "product": "Legs", "quantity": 4 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 1", "duration": "6:00" }
+      ]
+    },
+    {
+      "id": "BOM-000008",
+      "finishedProduct": "Dining Chair",
+      "reference": "[8008]",
+      "quantity": 1,
+      "components": [
+        { "product": "Seat", "quantity": 1 },
+        { "product": "Back Rest", "quantity": 1 },
+        { "product": "Legs", "quantity": 4 },
+        { "product": "Hardware", "quantity": 1 }
+      ],
+      "workOrders": [
+        { "operation": "Assembly", "workCenter": "Assembly Line 2", "duration": "2:30" }
+      ]
+    }
+  ]
+}
