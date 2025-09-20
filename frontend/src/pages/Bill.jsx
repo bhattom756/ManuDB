@@ -1,215 +1,229 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import Sidebar from '@/components/Sidebar'
+import BillOfMaterialsForm from '../components/BillForm'
 
-export default function Bill() {
+const BillsOfMaterialsContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedFilter, setSelectedFilter] = useState('All')
-  const [selectedRows, setSelectedRows] = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [viewMode, setViewMode] = useState('list') // 'list' or 'kanban'
+  const [showForm, setShowForm] = useState(false)
+  const [editingBOM, setEditingBOM] = useState(null)
 
-  // Sample data for bills of materials
+  // Sample Bills of Materials data
   const billsOfMaterials = [
     {
       id: 'BOM-000001',
-      reference: 'BOM-000001',
-      product: 'Dining Table',
-      version: '1.0',
-      status: 'Active',
-      components: '5',
-      totalCost: '$150.00',
-      lastUpdated: '2024-01-15'
+      finishedProduct: 'Drawer',
+      reference: '[8001]',
+      quantity: 1,
+      components: [
+        { product: 'Wood Panel', quantity: 2 },
+        { product: 'Screws', quantity: 8 }
+      ],
+      workOrders: [
+        { operation: 'Assembly', workCenter: 'Assembly Line 1', duration: '2:00' }
+      ]
     },
     {
       id: 'BOM-000002',
-      reference: 'BOM-000002',
-      product: 'Drawer',
-      version: '2.1',
-      status: 'Draft',
-      components: '3',
-      totalCost: '$75.00',
-      lastUpdated: '2024-01-14'
+      finishedProduct: 'Office Chair',
+      reference: '[8002]',
+      quantity: 1,
+      components: [
+        { product: 'Seat Cushion', quantity: 1 },
+        { product: 'Back Rest', quantity: 1 },
+        { product: 'Base Frame', quantity: 1 }
+      ],
+      workOrders: [
+        { operation: 'Assembly', workCenter: 'Assembly Line 2', duration: '3:30' }
+      ]
+    },
+    {
+      id: 'BOM-000003',
+      finishedProduct: 'Dining Table',
+      reference: '[8003]',
+      quantity: 1,
+      components: [
+        { product: 'Table Top', quantity: 1 },
+        { product: 'Table Legs', quantity: 4 },
+        { product: 'Hardware Kit', quantity: 1 }
+      ],
+      workOrders: [
+        { operation: 'Assembly', workCenter: 'Assembly Line 3', duration: '4:00' }
+      ]
     }
   ]
 
-  const statusCounts = {
-    All: {
-      Draft: 4,
-      Active: 12,
-      'In Review': 3,
-      Archived: 2
-    },
-    My: {
-      Draft: 2,
-      Active: 8,
-      'In Review': 1
-    }
+  const filteredBOMs = billsOfMaterials.filter(bom => 
+    bom.finishedProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    bom.reference.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const handleNewBOM = () => {
+    setEditingBOM(null)
+    setShowForm(true)
   }
 
-  const handleRowSelect = (orderId) => {
-    setSelectedRows(prev => 
-      prev.includes(orderId) 
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    )
+  const handleEditBOM = (bom) => {
+    setEditingBOM(bom)
+    setShowForm(true)
   }
 
-  const handleSelectAll = () => {
-    setSelectedRows(
-      selectedRows.length === billsOfMaterials.length 
-        ? [] 
-        : billsOfMaterials.map(order => order.id)
-    )
+  const handleCloseForm = () => {
+    setShowForm(false)
+    setEditingBOM(null)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <button 
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-lg font-semibold">Bills of Materials</div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 lg:p-6 space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Bills of Materials</h1>
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">Manage product components and manufacturing specifications</p>
             </div>
-
+            
             <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <svg className="h-5 w-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              <Button 
+                onClick={handleNewBOM}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm lg:text-base px-4 py-2 lg:px-6 lg:py-3"
+              >
+                <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
+                New
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and View Controls */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search by finished product..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <div className="flex items-center space-x-1 lg:space-x-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('kanban')}
+                  className={`p-2 rounded-lg ${viewMode === 'kanban' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-pink-400">
-            Bills of Materials
-          </h1>
-        </div>
-
-        <div className="flex items-center justify-between mb-6">
-          <Button className="bg-pink-500 hover:bg-pink-600 text-white">
-            New Bill of Materials
-          </Button>
+        {/* Bills of Materials Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Bills of Materials</h3>
+            <p className="text-sm text-gray-600">Manage product components and manufacturing specifications</p>
+          </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search Bills of Materials"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Status Filters */}
-        <div className="mb-6">
-          <div className="flex space-x-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-pink-400">All</h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(statusCounts.All).map(([status, count]) => (
-                  <button
-                    key={status}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedFilter === 'All' 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    onClick={() => setSelectedFilter('All')}
-                  >
-                    {count} {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-pink-400">My</h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(statusCounts.My).map(([status, count]) => (
-                  <button
-                    key={status}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedFilter === 'My' 
-                        ? 'bg-pink-500 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    onClick={() => setSelectedFilter('My')}
-                  >
-                    {count} {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Data Table */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.length === billsOfMaterials.length}
-                      onChange={handleSelectAll}
-                      className="rounded border-gray-600 bg-gray-800 text-pink-500 focus:ring-pink-500"
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Reference</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Product</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Version</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Components</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total Cost</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Last Updated</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finished Product</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Components</th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {billsOfMaterials.map((bill) => (
-                  <tr key={bill.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(bill.id)}
-                        onChange={() => handleRowSelect(bill.id)}
-                        className="rounded border-gray-300 bg-white text-pink-500 focus:ring-pink-500"
-                      />
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredBOMs.length > 0 ? (
+                  filteredBOMs.map((bom) => (
+                    <tr key={bom.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{bom.finishedProduct}</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{bom.reference}</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{bom.quantity}</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{bom.components.length} components</div>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleEditBOM(bom)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Edit
+                          </button>
+                          <button className="text-red-600 hover:text-red-900">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-4 lg:px-6 py-12 text-center">
+                      <div className="text-gray-500 text-sm">
+                        {searchTerm ? 'No bills of materials found matching your search.' : 'No bills of materials available.'}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.reference}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.product}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.version}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.status}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.components}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.totalCost}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{bill.lastUpdated}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      </main>
+
+        {/* Branding */}
+        <div className="flex justify-between">
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <span>Brisk Goat</span>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <span>Beneficial Stork</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bill of Materials Form Modal */}
+      {showForm && (
+        <BillOfMaterialsForm 
+          isOpen={showForm}
+          onClose={handleCloseForm}
+          editingBOM={editingBOM}
+        />
+      )}
     </div>
   )
 }
+
+export default BillsOfMaterialsContent

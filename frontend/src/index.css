@@ -118,3 +118,48 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom styles for Master Menu header */
+.master-menu-header {
+  @apply px-6 py-4 mb-6 mt-2;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.master-menu-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+}
+
+.master-menu-header .flex {
+  position: relative;
+  z-index: 1;
+}
+
+.master-menu-header span {
+  @apply text-lg font-bold;
+  background: linear-gradient(135deg, #1e40af, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.025em;
+}
+
+.master-menu-header .w-8 {
+  @apply w-10 h-10;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.master-menu-header .w-8 svg {
+  @apply w-5 h-5;
+}
