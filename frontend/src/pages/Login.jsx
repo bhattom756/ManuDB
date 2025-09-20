@@ -4,27 +4,39 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/context/AuthContext'
+import toast from 'react-hot-toast'
 
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { login, error, clearError } = useAuth()
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    if (error) clearError()
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: Implement login logic
-    console.log('Login attempt:', formData)
-    // For now, just navigate to dashboard
-    navigate('/dashboard')
+    setIsLoading(true)
+    
+    try {
+      await login(formData.email, formData.password)
+      toast.success('Login successful!')
+      navigate('/dashboard')
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Login failed')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -63,8 +75,8 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Sign in
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
             <div className="text-center text-sm">
               Don't have an account?{' '}

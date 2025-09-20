@@ -1,12 +1,41 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { postAPI } from '@/services/api'
+import toast from 'react-hot-toast'
 
 export default function Dashboard() {
+  const { user, logout, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    
+    fetchPosts()
+  }, [isAuthenticated, navigate])
+
+  const fetchPosts = async () => {
+    try {
+      const data = await postAPI.getPosts()
+      setPosts(data)
+    } catch (error) {
+      toast.error('Failed to fetch posts')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleLogout = () => {
-    // TODO: Implement logout logic
-    console.log('Logout clicked')
-    // For now, just reload the page to go back to login
-    window.location.href = '/login'
+    logout()
+    toast.success('Logged out successfully')
+    navigate('/login')
   }
 
   return (
@@ -15,7 +44,12 @@ export default function Dashboard() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+              {user && (
+                <p className="text-sm text-gray-600">Welcome back, {user.name || user.email}!</p>
+              )}
+            </div>
             <Button onClick={handleLogout} variant="outline">
               Logout
             </Button>

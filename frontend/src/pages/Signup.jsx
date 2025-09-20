@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/context/AuthContext'
+import toast from 'react-hot-toast'
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -12,27 +14,41 @@ export default function Signup() {
     password: '',
     confirmPassword: ''
   })
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { register, error, clearError } = useAuth()
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    if (error) clearError()
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
+      toast.error('Passwords do not match')
       return
     }
     
-    // TODO: Implement signup logic
-    console.log('Signup attempt:', formData)
-    // For now, just navigate to dashboard
-    navigate('/dashboard')
+    setIsLoading(true)
+    
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      })
+      toast.success('Account created successfully!')
+      navigate('/dashboard')
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Registration failed')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -94,8 +110,8 @@ export default function Signup() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Create account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{' '}
