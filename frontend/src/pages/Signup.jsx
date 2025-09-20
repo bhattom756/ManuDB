@@ -60,9 +60,9 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
           <div className="flex flex-col lg:flex-row min-h-[600px]">
             {/* Left Panel - Welcome Section */}
             <div className="lg:w-1/2 bg-gradient-to-br from-gray-800 to-black flex items-center justify-center p-8 lg:p-12">
@@ -87,11 +87,11 @@ export default function Signup() {
             {/* Right Panel - Signup Form */}
             <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
               <div className="w-full max-w-md mx-auto">
-                <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-8 text-center">
+                <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white mb-8 text-center">
                   Create Account
                 </h2>
 
-                <p className="text-center text-gray-500 mb-8 text-sm">
+                <p className="text-center text-gray-500 dark:text-gray-400 mb-8 text-sm">
                   or use your email for registration
                 </p>
 
@@ -107,7 +107,7 @@ export default function Signup() {
                               type="text"
                               placeholder="Name"
                               disabled={isLoading}
-                              className={`h-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-orange-500 transition-all duration-200 ${
+                              className={`h-12 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-600 focus:border-orange-500 dark:focus:border-orange-400 text-gray-900 dark:text-white transition-all duration-200 ${
                                 fieldState.error ? 'border-red-500 focus:border-red-500' : ''
                               }`}
                               {...field}
@@ -138,7 +138,7 @@ export default function Signup() {
                               type="email"
                               placeholder="Email"
                               disabled={isLoading}
-                              className={`h-12 bg-gray-50 border-gray-200 focus:bg-white focus:border-orange-500 transition-all duration-200 ${
+                              className={`h-12 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-600 focus:border-orange-500 dark:focus:border-orange-400 text-gray-900 dark:text-white transition-all duration-200 ${
                                 fieldState.error ? 'border-red-500 focus:border-red-500' : ''
                               }`}
                               {...field}
@@ -187,7 +187,7 @@ export default function Signup() {
                               />
                               <button
                                 type="button"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
                                 onClick={() => setShowPassword(!showPassword)}
                               >
                                 {showPassword ? '👁️' : '👁️‍🗨️'}
@@ -228,7 +228,7 @@ export default function Signup() {
                               />
                               <button
                                 type="button"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                               >
                                 {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
@@ -242,7 +242,7 @@ export default function Signup() {
 
                     <Button 
                       type="submit" 
-                      className="w-full h-12 bg-gray-600 hover:bg-gray-700 text-white font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="w-full h-12 bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
                       disabled={isLoading}
                     >
                       {isLoading ? 'Creating account...' : 'SIGN UP'}

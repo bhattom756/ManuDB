@@ -66,11 +66,11 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white">
-      <SidebarHeader className="border-b border-gray-200 p-4">
+    <Sidebar className="border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <SidebarHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center gap-3">
           {/* Vite logo */}
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-gray-200">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
             <svg className="h-5 w-5" width="31.88" height="32" viewBox="0 0 256 257" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="viteGradient1" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%">
@@ -88,14 +88,14 @@ export function AppSidebar() {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-semibold text-gray-900">Manufacturing Hub</span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">Manufacturing Hub</span>
           </div>
         </div>
       </SidebarHeader>
       
       <SidebarContent className="p-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <SidebarGroupLabel className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Master Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -109,7 +109,7 @@ export function AppSidebar() {
                     className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                       location.pathname === item.path
                         ? `${item.activeBg} ${item.iconColor} shadow-sm`
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <button 
@@ -120,13 +120,13 @@ export function AppSidebar() {
                       <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                         location.pathname === item.path 
                           ? item.iconBg 
-                          : 'bg-gray-100 group-hover:bg-gray-200'
+                          : 'bg-gray-100 dark:bg-gray-700'
                       }`}>
                         <svg 
                           className={`h-4 w-4 ${
                             location.pathname === item.path 
                               ? item.iconColor 
-                              : 'text-gray-600 group-hover:text-gray-700'
+                              : 'text-gray-600 dark:text-gray-400'
                           }`} 
                           fill="none" 
                           viewBox="0 0 24 24" 
@@ -144,7 +144,7 @@ export function AppSidebar() {
                         <SidebarMenuBadge className={`ml-auto ${
                           location.pathname === item.path
                             ? 'bg-white bg-opacity-20 text-current'
-                            : 'bg-gray-200 text-gray-600'
+                            : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                         }`}>
                           {item.count}
                         </SidebarMenuBadge>
