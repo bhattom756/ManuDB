@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         if (token) {
           // Verify token by getting current user
-          const userData = await userAPI.getCurrentUser();
-          setUser(userData);
+          const response = await userAPI.getCurrentUser();
+          setUser(response.data);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
@@ -44,14 +44,17 @@ export const AuthProvider = ({ children }) => {
       
       const response = await authAPI.login({ email, password });
       
-      // Store token and user data
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      setUser(response.user);
+      // Backend returns { data: { user, token } }
+      const { user, token } = response.data;
       
-      return response;
+      // Store token and user data
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      
+      return { user, token };
     } catch (error) {
-      setError(error.response?.data?.error || 'Login failed');
+      setError(error.response?.data?.message || 'Login failed');
       throw error;
     } finally {
       setLoading(false);
@@ -65,14 +68,17 @@ export const AuthProvider = ({ children }) => {
       
       const response = await authAPI.register(userData);
       
-      // Store token and user data
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      setUser(response.user);
+      // Backend returns { data: { user, token } }
+      const { user, token } = response.data;
       
-      return response;
+      // Store token and user data
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      
+      return { user, token };
     } catch (error) {
-      setError(error.response?.data?.error || 'Registration failed');
+      setError(error.response?.data?.message || 'Registration failed');
       throw error;
     } finally {
       setLoading(false);

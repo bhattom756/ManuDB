@@ -72,11 +72,22 @@ const TopNavbar = ({ onMenuClick, user, isMobile = false }) => {
                       />
                     </svg>
                   </div>
+                  
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {/* <DropdownMenuItem>
+                  <div className="hidden lg:block text-left">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {user?.name || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {user?.email || 'user@example.com'}
+                    </p>
+                  </div>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <svg
                     className="h-4 w-4 mr-2"
@@ -109,37 +120,59 @@ const TopNavbar = ({ onMenuClick, user, isMobile = false }) => {
                   </svg>
                   Reports
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={toggleTheme}>
-                  {isDark ? (
-                    <svg
-                      className="h-4 w-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                <DropdownMenuItem className="p-0">
+                  <div className="flex items-center justify-between w-full px-2 py-1.5">
+                    <div className="flex items-center">
+                      {isDark ? (
+                        <svg
+                          className="h-4 w-4 mr-2 text-yellow-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="h-4 w-4 mr-2 text-orange-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                      )}
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {isDark ? 'Dark Mode' : 'Light Mode'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTheme();
+                      }}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        isDark ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          isDark ? 'translate-x-4' : 'translate-x-0'
+                        }`}
                       />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="h-4 w-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                      />
-                    </svg>
-                  )}
-                  {isDark ? 'Light Mode' : 'Dark Mode'}
+                    </button>
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
