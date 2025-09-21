@@ -1,3 +1,2 @@
-Team 27: Khagesh, OM, Keyur, Heet
+Mockup/Blueprint : https://app.excalidraw.com/l/65VNwvy7c4X/7HR7aKGGRpt
 
-VIDEO_DEMO: https://drive.google.com/drive/folders/1lN_DiFPAuyLh1uauYxJWidPtYPxPG7-Y?usp=sharing
