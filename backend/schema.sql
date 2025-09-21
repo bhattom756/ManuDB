@@ -46,7 +46,7 @@ CREATE TYPE transaction_type_enum AS ENUM (
 );
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE users (
 );
 
 -- Products table
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL,
   type product_type_enum DEFAULT 'RAW_MATERIAL',
@@ -71,7 +71,7 @@ CREATE TABLE products (
 );
 
 -- BOMs table
-CREATE TABLE boms (
+CREATE TABLE IF NOT EXISTS boms (
   id SERIAL PRIMARY KEY,
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   reference VARCHAR(255),
@@ -82,7 +82,7 @@ CREATE TABLE boms (
 );
 
 -- BOM Components table
-CREATE TABLE bom_components (
+CREATE TABLE IF NOT EXISTS bom_components (
   id SERIAL PRIMARY KEY,
   bom_id INTEGER NOT NULL REFERENCES boms(id) ON DELETE CASCADE,
   product_id INTEGER NOT NULL REFERENCES products(id),
@@ -93,7 +93,7 @@ CREATE TABLE bom_components (
 );
 
 -- Work Centers table
-CREATE TABLE work_centers (
+CREATE TABLE IF NOT EXISTS work_centers (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL,
   capacity INTEGER DEFAULT 8,
@@ -104,7 +104,7 @@ CREATE TABLE work_centers (
 );
 
 -- Manufacturing Orders table
-CREATE TABLE manufacturing_orders (
+CREATE TABLE IF NOT EXISTS manufacturing_orders (
   id SERIAL PRIMARY KEY,
   mo_number VARCHAR(255) UNIQUE NOT NULL,
   finished_product_id INTEGER NOT NULL REFERENCES products(id),
@@ -118,7 +118,7 @@ CREATE TABLE manufacturing_orders (
 );
 
 -- Work Orders table
-CREATE TABLE work_orders (
+CREATE TABLE IF NOT EXISTS work_orders (
   id SERIAL PRIMARY KEY,
   mo_id INTEGER NOT NULL REFERENCES manufacturing_orders(id) ON DELETE CASCADE,
   work_center_id INTEGER NOT NULL REFERENCES work_centers(id),
@@ -132,7 +132,7 @@ CREATE TABLE work_orders (
 );
 
 -- Stock Ledger table
-CREATE TABLE stock_ledger (
+CREATE TABLE IF NOT EXISTS stock_ledger (
   id SERIAL PRIMARY KEY,
   product_id INTEGER NOT NULL REFERENCES products(id),
   transaction_type transaction_type_enum NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE stock_ledger (
 );
 
 -- Work Order Comments table
-CREATE TABLE work_order_comments (
+CREATE TABLE IF NOT EXISTS work_order_comments (
   id SERIAL PRIMARY KEY,
   work_order_id INTEGER NOT NULL REFERENCES work_orders(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id),
@@ -154,7 +154,7 @@ CREATE TABLE work_order_comments (
 );
 
 -- Work Order Issues table
-CREATE TABLE work_order_issues (
+CREATE TABLE IF NOT EXISTS work_order_issues (
   id SERIAL PRIMARY KEY,
   work_order_id INTEGER NOT NULL REFERENCES work_orders(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id),
