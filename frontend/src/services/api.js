@@ -48,17 +48,47 @@ export const authAPI = {
     const response = await api.post('/auth/login', credentials);
     return response.data;
   },
+
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/auth/profile');
+    return response.data;
+  },
+
+  updateProfile: async (userData) => {
+    const response = await api.put('/auth/profile', userData);
+    return response.data;
+  },
+
+  changePassword: async (passwordData) => {
+    const response = await api.post('/auth/change-password', passwordData);
+    return response.data;
+  },
 };
 
 // User API
 export const userAPI = {
   getUsers: async () => {
-    const response = await api.get('/users');
+    const response = await api.get('/auth/users');
     return response.data;
   },
 
   getCurrentUser: async () => {
-    const response = await api.get('/users/me');
+    const response = await api.get('/auth/profile');
+    return response.data;
+  },
+
+  updateUserRole: async (userId, role) => {
+    const response = await api.put(`/auth/users/${userId}/role`, { role });
+    return response.data;
+  },
+
+  deactivateUser: async (userId) => {
+    const response = await api.put(`/auth/users/${userId}/deactivate`);
     return response.data;
   },
 };
