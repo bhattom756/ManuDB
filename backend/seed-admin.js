@@ -21,7 +21,7 @@ async function seedAdmin() {
     
     // Create admin user
     const result = await db.query(
-      `INSERT INTO users (email, password, name, role, is_active, created_at, updated_at) 
+      `INSERT INTO users (email, password_hash, name, role, is_active, created_at, updated_at) 
        VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) 
        RETURNING id, email, name, role`,
       [
@@ -48,7 +48,7 @@ async function seedAdmin() {
     console.error('❌ Error seeding admin user:', error);
     process.exit(1);
   } finally {
-    await db.end();
+    // Database connection will be closed automatically
   }
 }
 
