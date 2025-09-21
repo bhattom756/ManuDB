@@ -146,6 +146,37 @@ class AuthController {
       next(error);
     }
   }
+
+  async activateUser(req, res, next) {
+    try {
+      const { userId } = req.params;
+      
+      const user = await authService.activateUser(parseInt(userId));
+      
+      res.json({
+        success: true,
+        message: 'User activated successfully',
+        data: user
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getUserById(req, res, next) {
+    try {
+      const { userId } = req.params;
+      
+      const user = await authService.getUserById(parseInt(userId));
+      
+      res.json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();
