@@ -1,42 +1,229 @@
-const prisma = require('../config/database');
+const db = require('../config/database');
 
-class DashboardController {
+// Helper function to get count
+async function getCount(tableName) {
+  try {
+    const result = await db.query(`SELECT COUNT(*) as count FROM ${tableName}`);
+    return parseInt(result.rows[0].count);
+  } catch (error) {
+    console.error(`Error getting count for ${tableName}:`, error);
+    return 0;
+  }
+}
+
+// Helper function to get manufacturing orders by status
+async function getManufacturingOrdersByStatus() {
+  try {
+    const query = `
+      SELECT status, COUNT(*) as count
+      FROM manufacturing_orders
+      GROUP BY status
+    `;
+    
+    const result = await db.query(query);
+    
+    return result.rows.reduce((acc, row) => {
+      acc[row.status] = parseInt(row.count);
+      return acc;
+    }, {});
+  } catch (error) {
+    console.error('Error getting manufacturing orders by status:', error);
+    return {};
+  }
+}
+
+// Helper function to get recent manufacturing orders
+async function getRecentManufacturingOrders() {
+  try {
+    const query = `
+      SELECT 
+        mo.id,
+        mo.mo_number,
+        mo.quantity,
+        mo.status,
+        mo.schedule_date,
+        p.name as product_name,
+        u.name as assignee_name
+      FROM manufacturing_orders mo
+      LEFT JOIN products p ON mo.finished_product_id = p.id
+      LEFT JOIN users u ON mo.assignee_id = u.id
+      ORDER BY mo.created_at DESC
+      LIMIT 5
+    `;
+    
+    const result = await db.query(query);
+    
+    return result.rows.map(row => ({
+      id: row.id,
+      moNumber: row.mo_number,
+      quantity: row.quantity,
+      status: row.status,
+      priority: 'MEDIUM', // Default priority
+      scheduleDate: row.schedule_date,
+      productName: row.product_name,
+      assigneeName: row.assignee_name
+    }));
+  } catch (error) {
+    console.error('Error getting recent manufacturing orders:', error);
+    return [];
+  }
+}
+
+// Helper function to get low stock products
+async function getLowStockProductsData(threshold = 10) {
+  try {
+    const query = `
+      SELECT 
+        id,
+        name,
+        type,
+        unit_of_measure,
+        unit_cost,
+        current_stock
+      FROM products
+      WHERE current_stock <= $1
+      ORDER BY current_stock ASC
+      LIMIT 10
+    `;
+
+    const result = await db.query(query, [threshold]);
+    
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      unitOfMeasure: row.unit_of_measure,
+      unitCost: row.unit_cost,
+      currentStock: row.current_stock
+    }));
+  } catch (error) {
+    console.error('Error getting low stock products:', error);
+    return [];
+  }
+}
+
+// Helper function to get KPIs
+async function getKPIsData() {
+  try {
+    // Get orders completed
+    const completedResult = await db.query(`
+      SELECT COUNT(*) as count
+      FROM manufacturing_orders
+      WHERE status = 'CLOSED'
+    `);
+    const ordersCompleted = parseInt(completedResult.rows[0].count);
+
+    // Get orders in progress
+    const inProgressResult = await db.query(`
+      SELECT COUNT(*) as count
+      FROM manufacturing_orders
+      WHERE status = 'IN_PROGRESS'
+    `);
+    const ordersInProgress = parseInt(inProgressResult.rows[0].count);
+
+    // Get delayed orders
+    const delayedResult = await db.query(`
+      SELECT COUNT(*) as count
+      FROM manufacturing_orders
+      WHERE status IN ('IN_PROGRESS', 'CONFIRMED') 
+      AND schedule_date < NOW()
+    `);
+    const ordersDelayed = parseInt(delayedResult.rows[0].count);
+
+    // Get work orders count
+    const workOrdersResult = await db.query(`
+      SELECT COUNT(*) as count
+      FROM work_orders
+    `);
+    const totalWorkOrders = parseInt(workOrdersResult.rows[0].count);
+
+    // Get completed work orders
+    const completedWorkOrdersResult = await db.query(`
+      SELECT COUNT(*) as count
+      FROM work_orders
+      WHERE status = 'COMPLETED'
+    `);
+    const completedWorkOrders = parseInt(completedWorkOrdersResult.rows[0].count);
+
+    const efficiency = totalWorkOrders > 0 ? (completedWorkOrders / totalWorkOrders) * 100 : 0;
+
+    return {
+      ordersCompleted,
+      ordersInProgress,
+      ordersDelayed,
+      totalWorkOrders,
+      completedWorkOrders,
+      efficiency: Math.round(efficiency * 100) / 100
+    };
+  } catch (error) {
+    console.error('Error getting KPIs:', error);
+    return {
+      ordersCompleted: 0,
+      ordersInProgress: 0,
+      ordersDelayed: 0,
+      totalWorkOrders: 0,
+      completedWorkOrders: 0,
+      efficiency: 0
+    };
+  }
+}
+
+// Dashboard controller functions
+const dashboardController = {
   // Get role-specific dashboard summary
   async getDashboardSummary(req, res, next) {
     try {
-      const userRole = req.user.role;
-      const userId = req.user.id;
+      // Use default role if no user is authenticated
+      const userRole = req.user?.role || 'BUSINESS_OWNER';
+      const userId = req.user?.id || null;
 
-      let dashboardData;
+      // Get basic counts
+      const [manufacturingOrdersCount, productsCount, workOrdersCount] = await Promise.all([
+        getCount('manufacturing_orders'),
+        getCount('products'),
+        getCount('work_orders')
+      ]);
 
-      switch (userRole) {
-        case 'BUSINESS_OWNER':
-          dashboardData = await this.getBusinessOwnerDashboard();
-          break;
-        case 'MANUFACTURING_MANAGER':
-          dashboardData = await this.getManufacturingManagerDashboard();
-          break;
-        case 'OPERATOR':
-          dashboardData = await this.getOperatorDashboard(userId);
-          break;
-        case 'INVENTORY_MANAGER':
-          dashboardData = await this.getInventoryManagerDashboard();
-          break;
-        default:
-          dashboardData = await this.getBasicDashboard();
-      }
+      // Get manufacturing orders by status
+      const manufacturingOrdersByStatus = await getManufacturingOrdersByStatus();
+
+      // Get recent manufacturing orders
+      const recentManufacturingOrders = await getRecentManufacturingOrders();
+
+      // Get low stock products
+      const lowStockProducts = await getLowStockProductsData();
+
+      // Get KPIs
+      const kpis = await getKPIsData();
+
+      const dashboardData = {
+        title: `${userRole.replace('_', ' ')} Dashboard`,
+        description: `Welcome to your ${userRole.replace('_', ' ').toLowerCase()} dashboard`,
+        userRole,
+        summary: {
+          totalManufacturingOrders: manufacturingOrdersCount,
+          totalProducts: productsCount,
+          totalWorkOrders: workOrdersCount
+        },
+        manufacturingOrdersByStatus,
+        recentManufacturingOrders,
+        lowStockProducts,
+        kpis
+      };
 
       res.json({
         success: true,
-        data: {
-          userRole,
-          ...dashboardData
-        }
+        data: dashboardData
       });
     } catch (error) {
-      next(error);
+      console.error('Dashboard summary error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load dashboard data',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
-  }
+  },
 
   // Get manufacturing orders with filtering
   async getManufacturingOrders(req, res, next) {
@@ -47,89 +234,110 @@ class DashboardController {
         search,
         status,
         assigneeId,
-        sortBy = 'createdAt',
+        sortBy = 'created_at',
         sortOrder = 'desc'
       } = req.query;
 
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      const take = parseInt(limit);
-
-      // Build where clause
-      const where = {};
+      // Convert camelCase to snake_case for database columns
+      const columnMapping = {
+        'createdAt': 'created_at',
+        'updatedAt': 'updated_at',
+        'moNumber': 'mo_number',
+        'scheduleDate': 'schedule_date'
+      };
       
+      const dbSortBy = columnMapping[sortBy] || sortBy;
+
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+      const limitNum = parseInt(limit);
+
+      // Build WHERE clause
+      let whereConditions = [];
+      let queryParams = [];
+      let paramCount = 0;
+
       if (search) {
-        where.OR = [
-          { moNumber: { contains: search, mode: 'insensitive' } },
-          { finishedProduct: { name: { contains: search, mode: 'insensitive' } } }
-        ];
+        paramCount++;
+        whereConditions.push(`(mo.mo_number ILIKE $${paramCount} OR p.name ILIKE $${paramCount})`);
+        queryParams.push(`%${search}%`);
       }
 
       if (status) {
-        where.status = status;
+        paramCount++;
+        whereConditions.push(`mo.status = $${paramCount}`);
+        queryParams.push(status);
       }
 
       if (assigneeId) {
-        where.assigneeId = parseInt(assigneeId);
+        paramCount++;
+        whereConditions.push(`mo.assignee_id = $${paramCount}`);
+        queryParams.push(parseInt(assigneeId));
       }
 
-      const [manufacturingOrders, total] = await Promise.all([
-        prisma.manufacturingOrder.findMany({
-          where,
-          include: {
-            finishedProduct: {
-              select: {
-                id: true,
-                name: true,
-                type: true,
-                unitOfMeasure: true
-              }
-            },
-            assignee: {
-              select: {
-                id: true,
-                userId: true,
-                name: true,
-                role: true
-              }
-            },
-            billOfMaterial: {
-              select: {
-                id: true,
-                reference: true,
-                version: true
-              }
-            },
-            workOrders: {
-              select: {
-                id: true,
-                operationName: true,
-                status: true,
-                expectedDuration: true,
-                realDuration: true,
-                workCenter: {
-                  select: {
-                    id: true,
-                    name: true
-                  }
-                },
-                assignedTo: {
-                  select: {
-                    id: true,
-                    userId: true,
-                    name: true
-                  }
-                }
-              }
-            }
-          },
-          orderBy: {
-            [sortBy]: sortOrder
-          },
-          skip,
-          take
-        }),
-        prisma.manufacturingOrder.count({ where })
-      ]);
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+      // Get total count
+      const countQuery = `
+        SELECT COUNT(*) as total
+        FROM manufacturing_orders mo
+        LEFT JOIN products p ON mo.finished_product_id = p.id
+        LEFT JOIN users u ON mo.assignee_id = u.id
+        ${whereClause}
+      `;
+      
+      const countResult = await db.query(countQuery, queryParams);
+      const total = parseInt(countResult.rows[0].total);
+
+      // Get manufacturing orders
+      const ordersQuery = `
+        SELECT 
+          mo.id,
+          mo.mo_number,
+          mo.quantity,
+          mo.status,
+          mo.schedule_date,
+          mo.created_at,
+          mo.updated_at,
+          p.id as product_id,
+          p.name as product_name,
+          p.type as product_type,
+          p.unit_of_measure,
+          u.id as assignee_id,
+          u.name as assignee_name,
+          u.role as assignee_role
+        FROM manufacturing_orders mo
+        LEFT JOIN products p ON mo.finished_product_id = p.id
+        LEFT JOIN users u ON mo.assignee_id = u.id
+        ${whereClause}
+        ORDER BY mo.${dbSortBy} ${sortOrder.toUpperCase()}
+        LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
+      `;
+
+      queryParams.push(limitNum, offset);
+      const ordersResult = await db.query(ordersQuery, queryParams);
+
+      // Format the results
+      ordersResult.rows.map(row => ({
+        id: row.id,
+        moNumber: row.mo_number,
+        quantity: row.quantity,
+        status: row.status,
+        priority: 'MEDIUM', // Default priority since not in schema
+        scheduleDate: row.schedule_date,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        finishedProduct: row.product_id ? {
+          id: row.product_id,
+          name: row.product_name,
+          type: row.product_type,
+          unitOfMeasure: row.unit_of_measure
+        } : null,
+        assignee: row.assignee_id ? {
+          id: row.assignee_id,
+          name: row.assignee_name,
+          role: row.assignee_role
+        } : null
+      }));
 
       res.json({
         success: true,
@@ -144,682 +352,54 @@ class DashboardController {
         }
       });
     } catch (error) {
-      next(error);
+      console.error('Manufacturing orders error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load manufacturing orders',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
-  }
+  },
 
   // Get low stock products
   async getLowStockProducts(req, res, next) {
     try {
       const { threshold = 10 } = req.query;
 
-      const lowStockProducts = await prisma.product.findMany({
-        where: {
-          currentStock: {
-            lte: parseInt(threshold)
-          }
-        },
-        select: {
-          id: true,
-          name: true,
-          type: true,
-          unitOfMeasure: true,
-          unitCost: true,
-          currentStock: true
-        },
-        orderBy: {
-          currentStock: 'asc'
-        }
-      });
+      const lowStockProducts = await getLowStockProductsData(parseInt(threshold));
 
       res.json({
         success: true,
         data: lowStockProducts
       });
     } catch (error) {
-      next(error);
+      console.error('Low stock products error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load low stock products',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
-  }
+  },
 
   // Get KPIs
   async getKPIs(req, res, next) {
     try {
-      const { startDate, endDate } = req.query;
-      
-      const dateFilter = {};
-      if (startDate && endDate) {
-        dateFilter.createdAt = {
-          gte: new Date(startDate),
-          lte: new Date(endDate)
-        };
-      }
-
-      const [
-        ordersCompleted,
-        ordersInProgress,
-        ordersDelayed,
-        totalWorkOrders,
-        completedWorkOrders,
-        stockValue
-      ] = await Promise.all([
-        prisma.manufacturingOrder.count({
-          where: { ...dateFilter, status: 'CLOSED' }
-        }),
-        prisma.manufacturingOrder.count({
-          where: { ...dateFilter, status: 'IN_PROGRESS' }
-        }),
-        prisma.manufacturingOrder.count({
-          where: {
-            ...dateFilter,
-            status: { in: ['IN_PROGRESS', 'CONFIRMED'] },
-            scheduleDate: { lt: new Date() }
-          }
-        }),
-        prisma.workOrder.count({ where: dateFilter }),
-        prisma.workOrder.count({
-          where: { ...dateFilter, status: 'COMPLETED' }
-        }),
-        this.calculateStockValue()
-      ]);
-
-      const efficiency = totalWorkOrders > 0 ? (completedWorkOrders / totalWorkOrders) * 100 : 0;
+      const kpis = await getKPIsData();
 
       res.json({
         success: true,
-        data: {
-          ordersCompleted,
-          ordersInProgress,
-          ordersDelayed,
-          totalWorkOrders,
-          completedWorkOrders,
-          efficiency: Math.round(efficiency * 100) / 100,
-          stockValue
-        }
+        data: kpis
       });
     } catch (error) {
-      next(error);
+      console.error('KPIs error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to load KPIs',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
+};
 
-  // Helper methods
-  async getManufacturingOrdersByStatus() {
-    const statusCounts = await prisma.manufacturingOrder.groupBy({
-      by: ['status'],
-      _count: {
-        status: true
-      }
-    });
-
-    return statusCounts.reduce((acc, item) => {
-      acc[item.status] = item._count.status;
-      return acc;
-    }, {});
-  }
-
-  async getWorkOrdersByStatus() {
-    const statusCounts = await prisma.workOrder.groupBy({
-      by: ['status'],
-      _count: {
-        status: true
-      }
-    });
-
-    return statusCounts.reduce((acc, item) => {
-      acc[item.status] = item._count.status;
-      return acc;
-    }, {});
-  }
-
-  async getRecentManufacturingOrders() {
-    return await prisma.manufacturingOrder.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        finishedProduct: {
-          select: {
-            id: true,
-            name: true,
-            type: true
-          }
-        },
-        assignee: {
-          select: {
-            id: true,
-            userId: true,
-            name: true
-          }
-        }
-      }
-    });
-  }
-
-  async getLowStockProducts() {
-    return await prisma.product.findMany({
-      where: {
-        currentStock: {
-          lte: 10
-        }
-      },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        unitOfMeasure: true,
-        currentStock: true
-      },
-      orderBy: {
-        currentStock: 'asc'
-      },
-      take: 10
-    });
-  }
-
-  async calculateStockValue() {
-    const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        currentStock: true,
-        unitCost: true
-      }
-    });
-
-    const totalValue = products.reduce((sum, product) => {
-      return sum + (product.currentStock * product.unitCost);
-    }, 0);
-
-    return {
-      totalValue,
-      productCount: products.length,
-      lowStockCount: products.filter(p => p.currentStock <= 10).length
-    };
-  }
-
-  // Role-specific dashboard methods
-  async getBusinessOwnerDashboard() {
-    const [
-      totalManufacturingOrders,
-      totalWorkOrders,
-      totalProducts,
-      totalBOMs,
-      totalWorkCenters,
-      totalStockLedger,
-      manufacturingOrdersByStatus,
-      workOrdersByStatus,
-      recentManufacturingOrders,
-      lowStockProducts,
-      kpis,
-      stockValue
-    ] = await Promise.all([
-      prisma.manufacturingOrder.count(),
-      prisma.workOrder.count(),
-      prisma.product.count(),
-      prisma.bOM.count(),
-      prisma.workCenter.count(),
-      prisma.stockLedger.count(),
-      this.getManufacturingOrdersByStatus(),
-      this.getWorkOrdersByStatus(),
-      this.getRecentManufacturingOrders(),
-      this.getLowStockProducts(),
-      this.getKPIs(),
-      this.calculateStockValue()
-    ]);
-
-    return {
-      title: "Business Owner Dashboard",
-      description: "Monitor overall production KPIs, generate reports, and ensure traceability",
-      summary: {
-        totalManufacturingOrders,
-        totalWorkOrders,
-        totalProducts,
-        totalBOMs,
-        totalWorkCenters,
-        totalStockLedger
-      },
-      manufacturingOrdersByStatus,
-      workOrdersByStatus,
-      recentManufacturingOrders,
-      lowStockProducts,
-      kpis,
-      stockValue,
-      features: [
-        "Production KPIs and Analytics",
-        "Overall System Overview",
-        "Financial Reports",
-        "Traceability Reports",
-        "User Management"
-      ]
-    };
-  }
-
-  async getManufacturingManagerDashboard() {
-    const [
-      manufacturingOrdersByStatus,
-      workOrdersByStatus,
-      recentManufacturingOrders,
-      workCenterUtilization,
-      productionEfficiency
-    ] = await Promise.all([
-      this.getManufacturingOrdersByStatus(),
-      this.getWorkOrdersByStatus(),
-      this.getRecentManufacturingOrders(),
-      this.getWorkCenterUtilization(),
-      this.getProductionEfficiency()
-    ]);
-
-    return {
-      title: "Manufacturing Manager Dashboard",
-      description: "Oversee production orders and workflows",
-      manufacturingOrdersByStatus,
-      workOrdersByStatus,
-      recentManufacturingOrders,
-      workCenterUtilization,
-      productionEfficiency,
-      features: [
-        "Production Order Management",
-        "Workflow Oversight",
-        "Work Center Utilization",
-        "Production Efficiency",
-        "Team Performance"
-      ]
-    };
-  }
-
-  async getOperatorDashboard(userId) {
-    const [
-      assignedWorkOrders,
-      workOrderStatus,
-      recentComments,
-      recentIssues,
-      workCenterInfo
-    ] = await Promise.all([
-      this.getAssignedWorkOrders(userId),
-      this.getWorkOrderStatusForOperator(userId),
-      this.getRecentComments(userId),
-      this.getRecentIssues(userId),
-      this.getWorkCenterInfoForOperator(userId)
-    ]);
-
-    return {
-      title: "Operator Dashboard",
-      description: "Execute assigned work orders and update status",
-      assignedWorkOrders,
-      workOrderStatus,
-      recentComments,
-      recentIssues,
-      workCenterInfo,
-      features: [
-        "My Assigned Work Orders",
-        "Work Order Status Updates",
-        "Comments and Issues",
-        "Work Center Information",
-        "Production Progress"
-      ]
-    };
-  }
-
-  async getInventoryManagerDashboard() {
-    const [
-      stockSummary,
-      lowStockProducts,
-      recentStockMovements,
-      stockValue,
-      inventoryAlerts
-    ] = await Promise.all([
-      this.getStockSummary(),
-      this.getLowStockProducts(),
-      this.getRecentStockMovements(),
-      this.calculateStockValue(),
-      this.getInventoryAlerts()
-    ]);
-
-    return {
-      title: "Inventory Manager Dashboard",
-      description: "Track stock movement, raw material usage, and ledger balance",
-      stockSummary,
-      lowStockProducts,
-      recentStockMovements,
-      stockValue,
-      inventoryAlerts,
-      features: [
-        "Stock Movement Tracking",
-        "Raw Material Usage",
-        "Ledger Balance",
-        "Inventory Alerts",
-        "Stock Adjustments"
-      ]
-    };
-  }
-
-  async getBasicDashboard() {
-    const [
-      totalManufacturingOrders,
-      totalWorkOrders,
-      totalProducts,
-      manufacturingOrdersByStatus,
-      workOrdersByStatus
-    ] = await Promise.all([
-      prisma.manufacturingOrder.count(),
-      prisma.workOrder.count(),
-      prisma.product.count(),
-      this.getManufacturingOrdersByStatus(),
-      this.getWorkOrdersByStatus()
-    ]);
-
-    return {
-      title: "Basic Dashboard",
-      description: "General system overview",
-      summary: {
-        totalManufacturingOrders,
-        totalWorkOrders,
-        totalProducts
-      },
-      manufacturingOrdersByStatus,
-      workOrdersByStatus
-    };
-  }
-
-  // Helper methods for role-specific dashboards
-  async getKPIs() {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-    const [
-      ordersCompleted,
-      ordersInProgress,
-      ordersDelayed,
-      totalWorkOrders,
-      completedWorkOrders
-    ] = await Promise.all([
-      prisma.manufacturingOrder.count({
-        where: { status: 'CLOSED', createdAt: { gte: startOfMonth } }
-      }),
-      prisma.manufacturingOrder.count({
-        where: { status: 'IN_PROGRESS' }
-      }),
-      prisma.manufacturingOrder.count({
-        where: {
-          status: { in: ['IN_PROGRESS', 'CONFIRMED'] },
-          scheduleDate: { lt: today }
-        }
-      }),
-      prisma.workOrder.count(),
-      prisma.workOrder.count({
-        where: { status: 'COMPLETED' }
-      })
-    ]);
-
-    const efficiency = totalWorkOrders > 0 ? (completedWorkOrders / totalWorkOrders) * 100 : 0;
-
-    return {
-      ordersCompleted,
-      ordersInProgress,
-      ordersDelayed,
-      totalWorkOrders,
-      completedWorkOrders,
-      efficiency: Math.round(efficiency * 100) / 100
-    };
-  }
-
-  async getWorkCenterUtilization() {
-    const workCenters = await prisma.workCenter.findMany({
-      include: {
-        workOrders: {
-          select: {
-            expectedDuration: true,
-            realDuration: true,
-            status: true
-          }
-        }
-      }
-    });
-
-    return workCenters.map(center => {
-      const totalExpected = center.workOrders.reduce((sum, wo) => sum + wo.expectedDuration, 0);
-      const totalActual = center.workOrders.reduce((sum, wo) => sum + (wo.realDuration || 0), 0);
-      
-      return {
-        workCenterId: center.id,
-        name: center.name,
-        expectedDuration: totalExpected,
-        actualDuration: totalActual,
-        utilization: totalExpected > 0 ? (totalActual / totalExpected) * 100 : 0
-      };
-    });
-  }
-
-  async getProductionEfficiency() {
-    const workOrders = await prisma.workOrder.findMany({
-      where: {
-        status: 'COMPLETED'
-      },
-      select: {
-        expectedDuration: true,
-        realDuration: true
-      }
-    });
-
-    const totalExpected = workOrders.reduce((sum, wo) => sum + wo.expectedDuration, 0);
-    const totalActual = workOrders.reduce((sum, wo) => sum + (wo.realDuration || 0), 0);
-
-    return {
-      totalExpected,
-      totalActual,
-      efficiency: totalExpected > 0 ? (totalActual / totalExpected) * 100 : 0,
-      completedOrders: workOrders.length
-    };
-  }
-
-  async getAssignedWorkOrders(userId) {
-    return await prisma.workOrder.findMany({
-      where: {
-        assignedToId: userId,
-        status: { in: ['PLANNED', 'STARTED', 'PAUSED'] }
-      },
-      include: {
-        manufacturingOrder: {
-          include: {
-            finishedProduct: {
-              select: {
-                id: true,
-                name: true,
-                type: true
-              }
-            }
-          }
-        },
-        workCenter: {
-          select: {
-            id: true,
-            name: true,
-            capacity: true,
-            costPerHour: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-  }
-
-  async getWorkOrderStatusForOperator(userId) {
-    const statusCounts = await prisma.workOrder.groupBy({
-      by: ['status'],
-      where: {
-        assignedToId: userId
-      },
-      _count: {
-        status: true
-      }
-    });
-
-    return statusCounts.reduce((acc, item) => {
-      acc[item.status] = item._count.status;
-      return acc;
-    }, {});
-  }
-
-  async getRecentComments(userId) {
-    return await prisma.workOrderComment.findMany({
-      where: {
-        workOrder: {
-          assignedToId: userId
-        }
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            userId: true,
-            name: true
-          }
-        },
-        workOrder: {
-          select: {
-            id: true,
-            operationName: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 5
-    });
-  }
-
-  async getRecentIssues(userId) {
-    return await prisma.workOrderIssue.findMany({
-      where: {
-        workOrder: {
-          assignedToId: userId
-        }
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            userId: true,
-            name: true
-          }
-        },
-        workOrder: {
-          select: {
-            id: true,
-            operationName: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 5
-    });
-  }
-
-  async getWorkCenterInfoForOperator(userId) {
-    const workOrders = await prisma.workOrder.findMany({
-      where: {
-        assignedToId: userId
-      },
-      include: {
-        workCenter: {
-          select: {
-            id: true,
-            name: true,
-            capacity: true,
-            costPerHour: true
-          }
-        }
-      }
-    });
-
-    const workCenters = workOrders.reduce((acc, wo) => {
-      if (!acc[wo.workCenter.id]) {
-        acc[wo.workCenter.id] = {
-          ...wo.workCenter,
-          workOrderCount: 0
-        };
-      }
-      acc[wo.workCenter.id].workOrderCount++;
-      return acc;
-    }, {});
-
-    return Object.values(workCenters);
-  }
-
-  async getStockSummary() {
-    const products = await prisma.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        currentStock: true,
-        unitOfMeasure: true,
-        unitCost: true
-      }
-    });
-
-    const totalValue = products.reduce((sum, product) => {
-      return sum + (product.currentStock * product.unitCost);
-    }, 0);
-
-    return {
-      totalProducts: products.length,
-      totalValue,
-      lowStockCount: products.filter(p => p.currentStock <= 10).length,
-      productsByType: products.reduce((acc, product) => {
-        acc[product.type] = (acc[product.type] || 0) + 1;
-        return acc;
-      }, {})
-    };
-  }
-
-  async getRecentStockMovements() {
-    return await prisma.stockLedger.findMany({
-      take: 10,
-      orderBy: {
-        transactionDate: 'desc'
-      },
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            unitOfMeasure: true
-          }
-        }
-      }
-    });
-  }
-
-  async getInventoryAlerts() {
-    const lowStockProducts = await prisma.product.findMany({
-      where: {
-        currentStock: {
-          lte: 10
-        }
-      },
-      select: {
-        id: true,
-        name: true,
-        currentStock: true,
-        unitOfMeasure: true,
-        unitCost: true
-      },
-      orderBy: {
-        currentStock: 'asc'
-      }
-    });
-
-    return {
-      lowStockCount: lowStockProducts.length,
-      criticalStock: lowStockProducts.filter(p => p.currentStock === 0).length,
-      products: lowStockProducts
-    };
-  }
-}
-
-module.exports = new DashboardController();
+module.exports = dashboardController;

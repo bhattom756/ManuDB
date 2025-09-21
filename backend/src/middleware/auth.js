@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const prisma = require('../config/database');
+const db = require('../config/database');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -16,19 +16,14 @@ const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Verify user still exists and is active
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        userId: true,
-        email: true,
-        name: true,
-        role: true,
-        isActive: true
-      }
-    });
+    const userResult = await db.query(
+      'SELECT id, email, name, role, is_active FROM users WHERE id = $1 AND is_active = true',
+      [decoded.id]
+    );
+    
+    const user = userResult.rows[0];
 
-    if (!user || !user.isActive) {
+    if (!user || !user.is_active) {
       return res.status(403).json({ 
         success: false,
         message: 'User not found or inactive' 
@@ -86,19 +81,13 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        select: {
-          id: true,
-          userId: true,
-          email: true,
-          name: true,
-          role: true,
-          isActive: true
-        }
-      });
-
-      if (user && user.isActive) {
+      const userResult = await db.query(
+        'SELECT id, email, name, role, is_active FROM users WHERE id = $1 AND is_active = true',
+        [decoded.id]
+      );
+      
+      const user = userResult.rows[0];
+      if (user && user.is_active) {
         req.user = user;
       }
     }

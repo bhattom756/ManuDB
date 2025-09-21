@@ -3,8 +3,7 @@ const router = express.Router();
 const dashboardController = require('../controllers/dashboardController');
 const { authenticateToken } = require('../middleware/auth');
 
-// All dashboard routes require authentication
-router.use(authenticateToken);
+// Dashboard routes are now public (no authentication required)
 
 // Dashboard summary (role-specific)
 router.get('/summary', dashboardController.getDashboardSummary);

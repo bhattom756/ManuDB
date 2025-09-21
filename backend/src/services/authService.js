@@ -231,6 +231,41 @@ class AuthService {
       throw new Error(`Failed to deactivate user: ${error.message}`);
     }
   }
+
+  async activateUser(userId) {
+    try {
+      const userResult = await db.query(
+        `UPDATE users 
+         SET is_active = true, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1
+         RETURNING id, name, email, is_active, updated_at`,
+        [userId]
+      );
+
+      return userResult.rows[0];
+    } catch (error) {
+      throw new Error(`Failed to activate user: ${error.message}`);
+    }
+  }
+
+  async getUserById(userId) {
+    try {
+      const userResult = await db.query(
+        `SELECT id, name, email, mobile_no, role, is_active, created_at, updated_at
+         FROM users
+         WHERE id = $1`,
+        [userId]
+      );
+
+      if (userResult.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      return userResult.rows[0];
+    } catch (error) {
+      throw new Error(`Failed to fetch user: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new AuthService();

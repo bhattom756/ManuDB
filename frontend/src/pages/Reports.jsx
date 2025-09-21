@@ -262,22 +262,22 @@ const WorkOrdersAnalysis = () => {
                       <div className="text-sm font-bold text-gray-900 dark:text-white">Total</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{filteredWorkOrders.length} Orders</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">{filteredWorkOrders.length} Orders</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">-</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">-</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{filteredWorkOrders.length}</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">{filteredWorkOrders.length}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{totals.expectedDuration}</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">{totals.expectedDuration}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">{totals.realDuration}</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">{totals.realDuration}</div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">-</div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-white">-</div>
                     </td>
                   </tr>
                 )}
