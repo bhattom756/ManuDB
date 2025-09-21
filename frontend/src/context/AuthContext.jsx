@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI, userAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -92,6 +93,27 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const updateUser = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await authAPI.updateProfile(userData);
+      
+      // Update user data in state and localStorage
+      const updatedUser = response.data;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    } catch (error) {
+      setError(error.response?.data?.message || 'Profile update failed');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
@@ -103,6 +125,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     clearError,
     isAuthenticated: !!user
   };

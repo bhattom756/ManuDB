@@ -2,43 +2,79 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Select from '@/components/ui/select'
+import toast from 'react-hot-toast'
 
-const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
+const StockLedgerForm = ({ isOpen, onClose, editingStockItem, onSave, loading = false }) => {
   const [formData, setFormData] = useState({
-    product: '',
+    productName: '',
+    sku: '',
+    productType: '',
+    unitOfMeasure: '',
     unitCost: '',
-    unit: '',
+    openingStock: '',
     totalValue: '',
-    onHand: '',
-    freeToUse: '',
-    incoming: '',
-    outgoing: ''
+    category: '',
+    reorderLevel: '',
+    description: ''
   })
 
-  const unitOptions = ['Unit', 'Piece', 'Kg', 'Meter', 'Liter', 'Box', 'Set']
+  // Dropdown options
+  const productTypeOptions = [
+    { value: 'raw-material', label: 'Raw Material' },
+    { value: 'finished-good', label: 'Finished Good' },
+    { value: 'consumable', label: 'Consumable' }
+  ]
+
+  const unitOfMeasureOptions = [
+    { value: 'pcs', label: 'Pieces (pcs)' },
+    { value: 'kg', label: 'Kilograms (kg)' },
+    { value: 'liters', label: 'Liters (L)' },
+    { value: 'meters', label: 'Meters (m)' },
+    { value: 'boxes', label: 'Boxes' },
+    { value: 'sets', label: 'Sets' },
+    { value: 'units', label: 'Units' },
+    { value: 'pounds', label: 'Pounds (lbs)' },
+    { value: 'gallons', label: 'Gallons (gal)' }
+  ]
+
+  const categoryOptions = [
+    { value: 'wood', label: 'Wood' },
+    { value: 'paint', label: 'Paint' },
+    { value: 'hardware', label: 'Hardware' },
+    { value: 'finished-product', label: 'Finished Product' },
+    { value: 'tools', label: 'Tools' },
+    { value: 'consumables', label: 'Consumables' },
+    { value: 'packaging', label: 'Packaging' },
+    { value: 'electronics', label: 'Electronics' }
+  ]
 
   useEffect(() => {
     if (editingStockItem) {
       setFormData({
-        product: editingStockItem.product || '',
+        productName: editingStockItem.productName || editingStockItem.product || '',
+        sku: editingStockItem.sku || '',
+        productType: editingStockItem.productType || '',
+        unitOfMeasure: editingStockItem.unitOfMeasure || editingStockItem.unit || '',
         unitCost: editingStockItem.unitCost || '',
-        unit: editingStockItem.unit || '',
+        openingStock: editingStockItem.openingStock || editingStockItem.onHand || '',
         totalValue: editingStockItem.totalValue || '',
-        onHand: editingStockItem.onHand || '',
-        freeToUse: editingStockItem.freeToUse || '',
-        incoming: editingStockItem.incoming || '',
-        outgoing: editingStockItem.outgoing || ''
+        category: editingStockItem.category || '',
+        reorderLevel: editingStockItem.reorderLevel || '',
+        description: editingStockItem.description || ''
       })
     } else {
       setFormData({
-        product: '',
+        productName: '',
+        sku: '',
+        productType: '',
+        unitOfMeasure: '',
         unitCost: '',
-        unit: '',
+        openingStock: '',
         totalValue: '',
-        onHand: '',
-        freeToUse: '',
-        incoming: '',
-        outgoing: ''
+        category: '',
+        reorderLevel: '',
+        description: ''
       })
     }
   }, [editingStockItem])
@@ -46,20 +82,47 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
   const handleInputChange = (field, value) => {
     const newFormData = { ...formData, [field]: value }
     
-    // Calculate total value when unit cost or on hand changes
-    if (field === 'unitCost' || field === 'onHand') {
+    // Calculate total value when unit cost or opening stock changes
+    if (field === 'unitCost' || field === 'openingStock') {
       const unitCost = field === 'unitCost' ? parseFloat(value) || 0 : parseFloat(newFormData.unitCost) || 0
-      const onHand = field === 'onHand' ? parseFloat(value) || 0 : parseFloat(newFormData.onHand) || 0
-      newFormData.totalValue = (unitCost * onHand).toString()
+      const openingStock = field === 'openingStock' ? parseFloat(value) || 0 : parseFloat(newFormData.openingStock) || 0
+      newFormData.totalValue = (unitCost * openingStock).toString()
     }
     
     setFormData(newFormData)
   }
 
-  const handleSave = () => {
-    // Here you would typically save the data to your backend
-    console.log('Saving Stock Item:', formData)
-    onClose()
+  const handleSave = async () => {
+    // Validate required fields
+    if (!formData.productName.trim()) {
+      toast.error('Product Name is required')
+      return
+    }
+    if (!formData.sku.trim()) {
+      toast.error('SKU/Code is required')
+      return
+    }
+    if (!formData.productType) {
+      toast.error('Product Type is required')
+      return
+    }
+    if (!formData.unitOfMeasure) {
+      toast.error('Unit of Measure is required')
+      return
+    }
+    if (!formData.openingStock || formData.openingStock <= 0) {
+      toast.error('Opening Stock must be greater than 0')
+      return
+    }
+
+    // Call the parent's save handler
+    if (onSave) {
+      await onSave(formData)
+    } else {
+      // Fallback for backward compatibility
+      console.log('Saving Stock Item:', formData)
+      onClose()
+    }
   }
 
   const formatCurrency = (amount) => {
@@ -96,9 +159,10 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
             </Button>
             <Button
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>
@@ -109,16 +173,57 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
             {/* Left Column */}
             <div className="space-y-4">
               <div>
-                <Label htmlFor="product" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Product
+                <Label htmlFor="productName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Product Name *
                 </Label>
                 <Input
-                  id="product"
+                  id="productName"
                   type="text"
-                  value={formData.product}
-                  onChange={(e) => handleInputChange('product', e.target.value)}
-                  placeholder="Enter product name"
+                  value={formData.productName}
+                  onChange={(e) => handleInputChange('productName', e.target.value)}
+                  placeholder="e.g. Wooden Leg"
                   className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="sku" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  SKU / Code *
+                </Label>
+                <Input
+                  id="sku"
+                  type="text"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange('sku', e.target.value)}
+                  placeholder="e.g. LEG-001"
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unique product identifier</p>
+              </div>
+
+              <div>
+                <Label htmlFor="productType" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Product Type *
+                </Label>
+                <Select
+                  options={productTypeOptions}
+                  value={formData.productType}
+                  onChange={(value) => handleInputChange('productType', value)}
+                  placeholder="Select product type"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="unitOfMeasure" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Unit of Measure *
+                </Label>
+                <Select
+                  options={unitOfMeasureOptions}
+                  value={formData.unitOfMeasure}
+                  onChange={(value) => handleInputChange('unitOfMeasure', value)}
+                  placeholder="Select unit of measure"
+                  className="mt-1"
                 />
               </div>
 
@@ -131,31 +236,31 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
                   type="number"
                   value={formData.unitCost}
                   onChange={(e) => handleInputChange('unitCost', e.target.value)}
-                  placeholder="0"
+                  placeholder="0.00"
                   min="0"
                   step="0.01"
                   className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Cost per unit (optional)</p>
               </div>
+            </div>
 
+            {/* Right Column */}
+            <div className="space-y-4">
               <div>
-                <Label htmlFor="unit" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Unit
+                <Label htmlFor="openingStock" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Opening Stock *
                 </Label>
-                <select
-                  id="unit"
-                  value={formData.unit}
-                  onChange={(e) => handleInputChange('unit', e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select unit</option>
-                  {unitOptions.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {unit}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Selection field</p>
+                <Input
+                  id="openingStock"
+                  type="number"
+                  value={formData.openingStock}
+                  onChange={(e) => handleInputChange('openingStock', e.target.value)}
+                  placeholder="e.g. 100"
+                  min="0"
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Starting balance</p>
               </div>
 
               <div>
@@ -169,72 +274,55 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
                   readOnly
                   className="mt-1 bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Readonly: on Hand * unit cost</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Auto-calculated: Opening Stock × Unit Cost</p>
+              </div>
+
+              <div>
+                <Label htmlFor="category" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Category
+                </Label>
+                <Select
+                  options={categoryOptions}
+                  value={formData.category}
+                  onChange={(value) => handleInputChange('category', value)}
+                  placeholder="Select category"
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional categorization</p>
+              </div>
+
+              <div>
+                <Label htmlFor="reorderLevel" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Reorder Level
+                </Label>
+                <Input
+                  id="reorderLevel"
+                  type="number"
+                  value={formData.reorderLevel}
+                  onChange={(e) => handleInputChange('reorderLevel', e.target.value)}
+                  placeholder="e.g. 20"
+                  min="0"
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Alert when stock falls below this level</p>
               </div>
             </div>
+          </div>
 
-            {/* Right Column */}
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="onHand" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  On Hand
-                </Label>
-                <Input
-                  id="onHand"
-                  type="number"
-                  value={formData.onHand}
-                  onChange={(e) => handleInputChange('onHand', e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="freeToUse" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Free to Use
-                </Label>
-                <Input
-                  id="freeToUse"
-                  type="number"
-                  value={formData.freeToUse}
-                  onChange={(e) => handleInputChange('freeToUse', e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="outgoing" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Outgoing
-                </Label>
-                <Input
-                  id="outgoing"
-                  type="number"
-                  value={formData.outgoing}
-                  onChange={(e) => handleInputChange('outgoing', e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="incoming" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Incoming
-                </Label>
-                <Input
-                  id="incoming"
-                  type="number"
-                  value={formData.incoming}
-                  onChange={(e) => handleInputChange('incoming', e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
+          {/* Description Field - Full Width */}
+          <div>
+            <Label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </Label>
+            <textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Optional details about the product..."
+              rows={3}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional notes and details</p>
           </div>
 
           {/* Summary Card */}
@@ -243,19 +331,39 @@ const StockLedgerForm = ({ isOpen, onClose, editingStockItem }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Product:</span>
-                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.product || 'Not specified'}</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.productName || 'Not specified'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">SKU:</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.sku || 'Not specified'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Type:</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">
+                  {productTypeOptions.find(opt => opt.value === formData.productType)?.label || 'Not specified'}
+                </span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Unit Cost:</span>
                 <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.unitCost ? formatCurrency(parseFloat(formData.unitCost)) : '₹0'}</span>
               </div>
               <div>
-                <span className="text-gray-500 dark:text-gray-400">On Hand:</span>
-                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.onHand || '0'}</span>
+                <span className="text-gray-500 dark:text-gray-400">Opening Stock:</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.openingStock || '0'}</span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Total Value:</span>
                 <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.totalValue ? formatCurrency(parseFloat(formData.totalValue)) : '₹0'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Category:</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">
+                  {categoryOptions.find(opt => opt.value === formData.category)?.label || 'Not specified'}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Reorder Level:</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">{formData.reorderLevel || 'Not set'}</span>
               </div>
             </div>
           </div>

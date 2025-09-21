@@ -44,6 +44,7 @@ export default function Signup() {
     setIsLoading(true)
     try {
       console.log('Attempting registration with:', data.email)
+      toast.loading('Creating your account...', { id: 'signup' })
       const response = await register({
         name: data.name,
         email: data.email,
@@ -51,11 +52,11 @@ export default function Signup() {
         mobileNo: data.mobileNo || null
       })
       console.log('Registration response:', response)
-      toast.success('Account created successfully!')
+      toast.success('Account created successfully!', { id: 'signup' })
       navigate('/dashboard')
     } catch (error) {
       console.error('Registration error:', error)
-      toast.error(error.response?.data?.error || 'Registration failed')
+      toast.error(error.response?.data?.error || 'Registration failed', { id: 'signup' })
     } finally {
       setIsLoading(false)
     }

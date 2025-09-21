@@ -1,17 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import WorkCenterForm from '../components/WorkCenterForm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import workCentersData from '@/data/workCenters.json'
+import toast from 'react-hot-toast'
 
 const WorkCentersContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
   const [showForm, setShowForm] = useState(false)
   const [editingWorkCenter, setEditingWorkCenter] = useState(null)
+  const [workCenters, setWorkCenters] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [workCenterToDelete, setWorkCenterToDelete] = useState(null)
 
-  // Use data from JSON file
-  const workCenters = workCentersData.workCenters
+  // Load initial data
+  useEffect(() => {
+    setWorkCenters(workCentersData.workCenters)
+  }, [])
 
   const filteredWorkCenters = workCenters.filter(center => 
     center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,6 +39,78 @@ const WorkCentersContent = () => {
   const handleCloseForm = () => {
     setShowForm(false)
     setEditingWorkCenter(null)
+  }
+
+  const handleDeleteWorkCenter = (workCenter) => {
+    setWorkCenterToDelete(workCenter)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!workCenterToDelete) return
+
+    try {
+      setLoading(true)
+      
+      // Show loading toast
+      toast.loading('Deleting work center...', { id: 'delete-workcenter' })
+      
+      // Simulate API call to delete from database
+      // In a real app, you would call your backend API here
+      console.log('Deleting work center from database:', workCenterToDelete.id)
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Remove from frontend state
+      setWorkCenters(prevCenters => prevCenters.filter(center => center.id !== workCenterToDelete.id))
+      
+      toast.success('Work center deleted successfully', { id: 'delete-workcenter' })
+    } catch (error) {
+      console.error('Error deleting work center:', error)
+      toast.error('Failed to delete work center', { id: 'delete-workcenter' })
+    } finally {
+      setLoading(false)
+      setWorkCenterToDelete(null)
+    }
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false)
+    setWorkCenterToDelete(null)
+  }
+
+  const handleSaveWorkCenter = async (formData) => {
+    try {
+      setLoading(true)
+      
+      if (editingWorkCenter) {
+        toast.loading('Updating work center...', { id: 'save-workcenter' })
+        console.log('Updating work center in database:', formData)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+        setWorkCenters(prevCenters => 
+          prevCenters.map(center => 
+            center.id === editingWorkCenter.id 
+              ? { ...center, ...formData, id: editingWorkCenter.id }
+              : center
+          )
+        )
+        toast.success('Work center updated successfully', { id: 'save-workcenter' })
+      } else {
+        toast.loading('Creating work center...', { id: 'save-workcenter' })
+        console.log('Creating new work center in database:', formData)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+        const newId = `WC-${String(workCenters.length + 1).padStart(3, '0')}`
+        setWorkCenters(prevCenters => [...prevCenters, { ...formData, id: newId }])
+        toast.success('Work center created successfully', { id: 'save-workcenter' })
+      }
+      handleCloseForm()
+    } catch (error) {
+      console.error('Error saving work center:', error)
+      toast.error('Failed to save work center', { id: 'save-workcenter' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -135,7 +215,7 @@ const WorkCentersContent = () => {
                           </div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">${center.costPerHour}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">Rs.{center.costPerHour}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{center.capacity} units</div>
@@ -155,11 +235,18 @@ const WorkCentersContent = () => {
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditWorkCenter(center)}
-                              className="text-blue-600 hover:text-blue-900"
+                              disabled={loading}
+                              className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Edit
                             </button>
-                            <button className="text-red-600 hover:text-red-900">Delete</button>
+                            <button 
+                              onClick={() => handleDeleteWorkCenter(center)}
+                              disabled={loading}
+                              className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -190,7 +277,7 @@ const WorkCentersContent = () => {
                         
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-500 dark:text-gray-400">Cost/Hour:</span>
-                          <span className="text-gray-900 dark:text-white">${center.costPerHour}</span>
+                          <span className="text-gray-900 dark:text-white">Rs.{center.costPerHour}</span>
                         </div>
                         
                         <div className="flex items-center justify-between text-sm">
@@ -215,11 +302,16 @@ const WorkCentersContent = () => {
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                         <button 
                           onClick={() => handleEditWorkCenter(center)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          disabled={loading}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <button 
+                          onClick={() => handleDeleteWorkCenter(center)}
+                          disabled={loading}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                           Delete
                         </button>
                       </div>
@@ -244,8 +336,22 @@ const WorkCentersContent = () => {
           isOpen={showForm}
           onClose={handleCloseForm}
           editingWorkCenter={editingWorkCenter}
+          onSave={handleSaveWorkCenter}
+          loading={loading}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={confirmDelete}
+        title="Delete Work Center"
+        description={`Are you sure you want to delete "${workCenterToDelete?.name}"?\n\nThis action cannot be undone and will permanently remove the work center from your system.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   )
 }

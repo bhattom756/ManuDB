@@ -1,21 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import StockLedgerForm from '../components/StockLedgerForm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import stockLedgerData from '@/data/stockLedger.json'
+import toast from 'react-hot-toast'
 
 const StockLedger = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
   const [showForm, setShowForm] = useState(false)
   const [editingStockItem, setEditingStockItem] = useState(null)
+  const [stockItems, setStockItems] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState(null)
 
-  // Use data from JSON file
-  const stockItems = stockLedgerData.stockItems
+  // Load initial data
+  useEffect(() => {
+    setStockItems(stockLedgerData.stockItems)
+  }, [])
 
   const filteredStockItems = stockItems.filter(item => 
-    item.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.unit.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.productName || item.product || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.sku || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.unitOfMeasure || item.unit || '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleNewStockItem = () => {
@@ -31,6 +40,99 @@ const StockLedger = () => {
   const handleCloseForm = () => {
     setShowForm(false)
     setEditingStockItem(null)
+  }
+
+  const handleDeleteStockItem = (item) => {
+    setItemToDelete(item)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return
+
+    try {
+      setLoading(true)
+      
+      // Show loading toast
+      toast.loading('Deleting stock item...', { id: 'delete-item' })
+      
+      // Simulate API call to delete from database
+      // In a real app, you would call your backend API here
+      console.log('Deleting item from database:', itemToDelete.id)
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Remove from frontend state
+      setStockItems(prevItems => prevItems.filter(stockItem => stockItem.id !== itemToDelete.id))
+      
+      toast.success('Stock item deleted successfully', { id: 'delete-item' })
+    } catch (error) {
+      console.error('Error deleting stock item:', error)
+      toast.error('Failed to delete stock item', { id: 'delete-item' })
+    } finally {
+      setLoading(false)
+      setItemToDelete(null)
+    }
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false)
+    setItemToDelete(null)
+  }
+
+  const handleSaveStockItem = async (formData) => {
+    try {
+      setLoading(true)
+      
+      if (editingStockItem) {
+        // Update existing item
+        console.log('Updating item in database:', formData)
+        
+        // Show loading toast
+        toast.loading('Updating stock item...', { id: 'save-item' })
+        
+        // Simulate API call to update in database
+        // In a real app, you would call your backend API here
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Update in frontend state
+        setStockItems(prevItems => 
+          prevItems.map(item => 
+            item.id === editingStockItem.id 
+              ? { ...item, ...formData, id: editingStockItem.id }
+              : item
+          )
+        )
+        
+        toast.success('Stock item updated successfully', { id: 'save-item' })
+      } else {
+        // Create new item
+        console.log('Creating new item in database:', formData)
+        
+        // Show loading toast
+        toast.loading('Creating stock item...', { id: 'save-item' })
+        
+        // Simulate API call to create in database
+        // In a real app, you would call your backend API here
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Generate new ID (in real app, this would come from the backend)
+        const newId = `ST-${String(stockItems.length + 1).padStart(3, '0')}`
+        
+        // Add to frontend state
+        setStockItems(prevItems => [...prevItems, { ...formData, id: newId }])
+        
+        toast.success('Stock item created successfully', { id: 'save-item' })
+      }
+      
+      handleCloseForm()
+    } catch (error) {
+      console.error('Error saving stock item:', error)
+      toast.error('Failed to save stock item', { id: 'save-item' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const formatCurrency = (amount) => {
@@ -79,7 +181,7 @@ const StockLedger = () => {
                 </div>
                 <Input
                   type="text"
-                  placeholder="Search by product or unit..."
+                  placeholder="Search by product name, SKU, or unit..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
@@ -120,17 +222,18 @@ const StockLedger = () => {
           
           {viewMode === 'list' ? (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px]">
+              <table className="w-full min-w-[1200px]">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit Cost</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product Name</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit Cost</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Opening Stock</th>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Value</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">On Hand</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Free to Use</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Incoming</th>
-                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Outgoing</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reorder Level</th>
                     <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -139,45 +242,64 @@ const StockLedger = () => {
                     filteredStockItems.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.product}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.productName || item.product}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{formatCurrency(item.unitCost)}</div>
+                          <div className="text-sm text-gray-900 dark:text-white font-mono">{item.sku || '-'}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{item.unit}</div>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            item.productType === 'raw-material' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                            item.productType === 'finished-good' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            item.productType === 'consumable' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          }`}>
+                            {item.productType === 'raw-material' ? 'Raw Material' :
+                             item.productType === 'finished-good' ? 'Finished Good' :
+                             item.productType === 'consumable' ? 'Consumable' : 'Unknown'}
+                          </span>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{formatCurrency(item.totalValue)}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.unitOfMeasure || item.unit}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{item.onHand}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{formatCurrency(item.unitCost)}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{item.freeToUse}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.openingStock || item.onHand}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{item.incoming}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{formatCurrency(item.totalValue)}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{item.outgoing}</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.category || '-'}</div>
+                        </td>
+                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-white">{item.reorderLevel || '-'}</div>
                         </td>
                         <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditStockItem(item)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                              disabled={loading}
                             >
                               Edit
                             </button>
-                            <button className="text-red-600 hover:text-red-900">Delete</button>
+                            <button 
+                              onClick={() => handleDeleteStockItem(item)}
+                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                              disabled={loading}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="9" className="px-4 lg:px-6 py-12 text-center">
+                      <td colSpan="10" className="px-4 lg:px-6 py-12 text-center">
                         <div className="text-gray-500 dark:text-gray-400 text-sm">
                           {searchTerm ? 'No stock items found matching your search.' : 'No stock items available.'}
                         </div>
@@ -195,8 +317,23 @@ const StockLedger = () => {
                     <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="space-y-3 mb-4">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{item.product}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{item.unit}</p>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{item.productName || item.product}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 font-mono">{item.sku || 'No SKU'}</p>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                            item.productType === 'raw-material' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                            item.productType === 'finished-good' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                            item.productType === 'consumable' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          }`}>
+                            {item.productType === 'raw-material' ? 'Raw Material' :
+                             item.productType === 'finished-good' ? 'Finished Good' :
+                             item.productType === 'consumable' ? 'Consumable' : 'Unknown'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">Unit:</span>
+                          <span className="text-gray-900 dark:text-white">{item.unitOfMeasure || item.unit}</span>
                         </div>
                         
                         <div className="flex items-center justify-between text-sm">
@@ -205,39 +342,43 @@ const StockLedger = () => {
                         </div>
                         
                         <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">Opening Stock:</span>
+                          <span className="text-gray-900 dark:text-white">{item.openingStock || item.onHand}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-500 dark:text-gray-400">Total Value:</span>
-                          <span className="text-gray-900 dark:text-white">{formatCurrency(item.totalValue)}</span>
+                          <span className="text-gray-900 dark:text-white font-semibold">{formatCurrency(item.totalValue)}</span>
                         </div>
                         
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">On Hand:</span>
-                          <span className="text-gray-900 dark:text-white">{item.onHand}</span>
-                        </div>
+                        {item.category && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">Category:</span>
+                            <span className="text-gray-900 dark:text-white">{item.category}</span>
+                          </div>
+                        )}
                         
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">Free to Use:</span>
-                          <span className="text-gray-900 dark:text-white">{item.freeToUse}</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">Incoming:</span>
-                          <span className="text-gray-900 dark:text-white">{item.incoming}</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">Outgoing:</span>
-                          <span className="text-gray-900 dark:text-white">{item.outgoing}</span>
-                        </div>
+                        {item.reorderLevel && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">Reorder Level:</span>
+                            <span className="text-gray-900 dark:text-white">{item.reorderLevel}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                         <button 
                           onClick={() => handleEditStockItem(item)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                          disabled={loading}
                         >
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <button 
+                          onClick={() => handleDeleteStockItem(item)}
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+                          disabled={loading}
+                        >
                           Delete
                         </button>
                       </div>
@@ -270,8 +411,22 @@ const StockLedger = () => {
           isOpen={showForm}
           onClose={handleCloseForm}
           editingStockItem={editingStockItem}
+          onSave={handleSaveStockItem}
+          loading={loading}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={confirmDelete}
+        title="Delete Stock Item"
+        description={`Are you sure you want to delete "${itemToDelete?.productName || itemToDelete?.product}"?\n\nThis action cannot be undone and will permanently remove the item from your inventory.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   )
 }

@@ -1,6 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const sgMail = require('@sendgrid/mail');
 const db = require('../config/database');
+
+// Configure SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 class AuthService {
   async register(userData) {
@@ -74,6 +79,19 @@ class AuthService {
   }
 
   async changePassword(userId, currentPassword, newPassword) {
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      throw new Error('Current password and new password are required');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new Error('New password must be different from current password');
+    }
+
+    if (newPassword.length < 8) {
+      throw new Error('New password must be at least 8 characters long');
+    }
+
     const userResult = await db.query(
       'SELECT password_hash FROM users WHERE id = $1',
       [userId]
@@ -98,7 +116,7 @@ class AuthService {
 
     // Update password
     await db.query(
-      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      'UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [passwordHash, userId]
     );
 
@@ -264,6 +282,133 @@ class AuthService {
       return userResult.rows[0];
     } catch (error) {
       throw new Error(`Failed to fetch user: ${error.message}`);
+    }
+  }
+
+  async forgotPassword(email) {
+    try {
+      // Check if user exists
+      const userResult = await db.query(
+        'SELECT id, name, email FROM users WHERE email = $1 AND is_active = true',
+        [email]
+      );
+
+      if (userResult.rows.length === 0) {
+        // Don't reveal if user exists or not for security
+        return { message: 'If an account with that email exists, a password reset link has been sent.' };
+      }
+
+      const user = userResult.rows[0];
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+      
+      // Set token expiry (1 hour from now)
+      const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+
+      // Store reset token in database
+      await db.query(
+        'UPDATE users SET reset_token = $1, reset_token_expiry = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+        [resetTokenHash, resetTokenExpiry, user.id]
+      );
+
+      // Create reset URL
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+      // Send email
+      const msg = {
+        to: user.email,
+        from: process.env.FROM_EMAIL || 'test@example.com',
+        subject: 'Password Reset Request - Mojo Manufacturing',
+        text: `
+          Hello ${user.name},
+          
+          You requested a password reset for your Mojo Manufacturing account.
+          
+          Click the link below to reset your password:
+          ${resetUrl}
+          
+          This link will expire in 1 hour.
+          
+          If you didn't request this password reset, please ignore this email.
+          
+          Best regards,
+          Mojo Manufacturing Team
+        `,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Password Reset Request</h2>
+            <p>Hello ${user.name},</p>
+            <p>You requested a password reset for your Mojo Manufacturing account.</p>
+            <p>Click the button below to reset your password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Reset Password</a>
+            </div>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+            <p><strong>This link will expire in 1 hour.</strong></p>
+            <p>If you didn't request this password reset, please ignore this email.</p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">Best regards,<br>Mojo Manufacturing Team</p>
+          </div>
+        `
+      };
+
+      await sgMail.send(msg);
+
+      return { message: 'Password reset email sent successfully' };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      
+      // Provide more specific error messages
+      if (error.code === 403) {
+        throw new Error('SendGrid API key is invalid or sender email is not verified. Please check your SendGrid configuration.');
+      } else if (error.code === 400) {
+        throw new Error('Invalid email format or SendGrid configuration error.');
+      } else {
+        throw new Error(`Failed to send password reset email: ${error.message}`);
+      }
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      // Hash the token to compare with stored hash
+      const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+      // Find user with valid reset token
+      const userResult = await db.query(
+        'SELECT id, reset_token_expiry FROM users WHERE reset_token = $1 AND reset_token_expiry > NOW()',
+        [resetTokenHash]
+      );
+
+      if (userResult.rows.length === 0) {
+        throw new Error('Invalid or expired reset token');
+      }
+
+      const user = userResult.rows[0];
+
+      // Validate new password
+      if (!newPassword || newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+
+      // Hash new password
+      const saltRounds = 12;
+      const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password and clear reset token
+      await db.query(
+        'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expiry = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+        [passwordHash, user.id]
+      );
+
+      return { message: 'Password reset successfully' };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw new Error('Failed to reset password');
     }
   }
 }

@@ -29,13 +29,14 @@ export default function Login() {
     setIsLoading(true)
     try {
       console.log('Attempting login with:', data.email)
+      toast.loading('Logging you in...', { id: 'login' })
       const response = await login(data.email, data.password)
       console.log('Login response:', response)
-      toast.success('Login successful!')
+      toast.success('Logged in successfully!', { id: 'login' })
       navigate('/dashboard')
     } catch (error) {
       console.error('Login error:', error)
-      toast.error(error.response?.data?.error || 'Login failed')
+      toast.error(error.response?.data?.error || 'Login failed', { id: 'login' })
     } finally {
       setIsLoading(false)
     }

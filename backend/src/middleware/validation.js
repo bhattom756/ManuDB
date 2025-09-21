@@ -69,6 +69,18 @@ const validateUserUpdate = [
   handleValidationErrors
 ];
 
+const validatePasswordChange = [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('Current password is required'),
+  body('newPassword')
+    .isLength({ min: 8 })
+    .withMessage('New password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
+  handleValidationErrors
+];
+
 // Product validation rules
 const validateProduct = [
   body('name')
@@ -253,6 +265,7 @@ module.exports = {
   validateUserRegistration,
   validateUserLogin,
   validateUserUpdate,
+  validatePasswordChange,
   validateProduct,
   validateBOM,
   validateBOMComponent,

@@ -3,11 +3,7 @@ require('dotenv').config();
 
 // Create PostgreSQL connection pool
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'manufacturing_db',
-  user: process.env.DB_USER || 'postgres',
-  password: String(process.env.DB_PASSWORD || 'admin'),
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:admin@localhost:5432/manufacturing_db',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds

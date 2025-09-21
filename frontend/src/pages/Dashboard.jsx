@@ -10,8 +10,9 @@ const DashboardContent = () => {
   const [selectedStatus, setSelectedStatus] = useState(null)
   const [selectedRows, setSelectedRows] = useState([])
   const [manufacturingOrderOpen, setManufacturingOrderOpen] = useState(false)
-  const [viewMode, setViewMode] = useState('card')
-  
+  const [editingOrderId, setEditingOrderId] = useState(null)
+  const [viewMode, setViewMode] = useState('card') 
+
   // Data states
   const [manufacturingOrders, setManufacturingOrders] = useState([])
   const [statusCounts, setStatusCounts] = useState({
@@ -33,6 +34,30 @@ const DashboardContent = () => {
     loadDashboardData()
   }, [])
 
+  // Listen for storage changes to refresh dashboard data
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'localManufacturingOrders') {
+        loadDashboardData()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom events (for same-tab updates)
+    const handleCustomStorageChange = () => {
+      console.log('Dashboard received manufacturingOrderUpdated event')
+      loadDashboardData()
+    }
+    
+    window.addEventListener('manufacturingOrderUpdated', handleCustomStorageChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('manufacturingOrderUpdated', handleCustomStorageChange)
+    }
+  }, [])
+
   // Load manufacturing orders when filters change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -45,17 +70,122 @@ const DashboardContent = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true)
-      const response = await dashboardAPI.getDashboardSummary()
-      if (response.success) {
-        setDashboardData(response.data)
-        // Extract status counts from the response
-        if (response.data.manufacturingOrdersByStatus) {
-          setStatusCounts({
-            All: response.data.manufacturingOrdersByStatus,
-            My: response.data.manufacturingOrdersByStatus // For now, using same data
-          })
+      
+      // Fetch from API
+      let apiData = null
+      let lowStockProducts = []
+      try {
+        const response = await dashboardAPI.getDashboardSummary()
+        if (response.success) {
+          apiData = response.data
         }
+        
+        // Fetch low stock products with threshold of 50
+        const lowStockResponse = await dashboardAPI.getLowStockProducts(50)
+        if (lowStockResponse.success) {
+          lowStockProducts = lowStockResponse.data
+        }
+      } catch (apiError) {
+        console.log('API not available, using local data only')
+        
+        // Fallback stock data for demonstration
+        lowStockProducts = [
+          {
+            id: 'steel-frame-001',
+            name: 'Steel Frame',
+            type: 'SEMI_FINISHED',
+            unitOfMeasure: 'PCS',
+            unitCost: 25.50,
+            currentStock: 15
+          },
+          {
+            id: 'plastic-housing-001',
+            name: 'Plastic Housing',
+            type: 'SEMI_FINISHED',
+            unitOfMeasure: 'PCS',
+            unitCost: 8.75,
+            currentStock: 32
+          },
+          {
+            id: 'industrial-widget-001',
+            name: 'Industrial Widget',
+            type: 'FINISHED_GOOD',
+            unitOfMeasure: 'PCS',
+            unitCost: 45.00,
+            currentStock: 8
+          },
+          {
+            id: 'consumer-device-001',
+            name: 'Consumer Device',
+            type: 'FINISHED_GOOD',
+            unitOfMeasure: 'PCS',
+            unitCost: 120.00,
+            currentStock: 23
+          }
+        ]
       }
+      
+      // Fetch from localStorage
+      const localOrders = JSON.parse(localStorage.getItem('localManufacturingOrders') || '[]')
+      console.log('Dashboard loading local orders:', localOrders)
+      
+      // Calculate local data counts
+      const localManufacturingOrdersCount = localOrders.length
+      const localWorkOrdersCount = localOrders.reduce((total, order) => {
+        return total + (order.workOrders ? order.workOrders.length : 0)
+      }, 0)
+      
+      // Calculate status counts from local data
+      const localStatusCounts = {}
+      localOrders.forEach(order => {
+        const status = order.status || 'DRAFT'
+        localStatusCounts[status] = (localStatusCounts[status] || 0) + 1
+      })
+      
+      // Calculate KPIs from local data
+      const localKPIs = {
+        ordersCompleted: localOrders.filter(order => order.status === 'DONE').length,
+        ordersInProgress: localOrders.filter(order => order.status === 'IN_PROGRESS').length,
+        ordersDelayed: localOrders.filter(order => {
+          if (order.deadline && order.status !== 'DONE' && order.status !== 'CANCELLED') {
+            const deadline = new Date(order.deadline)
+            const now = new Date()
+            return deadline < now
+          }
+          return false
+        }).length
+      }
+      
+      // Merge API and local data
+      const mergedData = {
+        ...apiData,
+        summary: {
+          ...apiData?.summary,
+          totalManufacturingOrders: (apiData?.summary?.totalManufacturingOrders || 0) + localManufacturingOrdersCount,
+          totalWorkOrders: (apiData?.summary?.totalWorkOrders || 0) + localWorkOrdersCount,
+          totalProducts: apiData?.summary?.totalProducts || 7 // Keep existing products count
+        },
+        manufacturingOrdersByStatus: {
+          ...apiData?.manufacturingOrdersByStatus,
+          ...localStatusCounts
+        },
+        kpis: {
+          ...apiData?.kpis,
+          ordersCompleted: (apiData?.kpis?.ordersCompleted || 0) + localKPIs.ordersCompleted,
+          ordersInProgress: (apiData?.kpis?.ordersInProgress || 0) + localKPIs.ordersInProgress,
+          ordersDelayed: (apiData?.kpis?.ordersDelayed || 0) + localKPIs.ordersDelayed
+        },
+        lowStockProducts: lowStockProducts
+      }
+      
+      setDashboardData(mergedData)
+      
+      // Set status counts
+      setStatusCounts({
+        All: mergedData.manufacturingOrdersByStatus || {},
+        My: mergedData.manufacturingOrdersByStatus || {} // For now, using same data
+      })
+      
     } catch (err) {
       setError('Failed to load dashboard data')
       console.error('Dashboard data error:', err)
@@ -66,20 +196,62 @@ const DashboardContent = () => {
 
   const loadManufacturingOrders = async () => {
     try {
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit,
-        search: searchTerm || undefined,
-        status: selectedStatus || undefined,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
-      }
+      // Fetch from API
+      let apiOrders = []
+      try {
+        const params = {
+          page: pagination.page,
+          limit: pagination.limit,
+          search: searchTerm || undefined,
+          status: selectedStatus || undefined,
+          sortBy: 'createdAt',
+          sortOrder: 'desc'
+        }
 
-      const response = await dashboardAPI.getManufacturingOrders(params)
-      if (response.success) {
-        setManufacturingOrders(response.data.manufacturingOrders)
-        setPagination(response.data.pagination)
+        const response = await dashboardAPI.getManufacturingOrders(params)
+        if (response.success) {
+          apiOrders = response.data.manufacturingOrders || []
+        }
+      } catch (apiError) {
+        console.log('API not available, using local data only')
+        apiOrders = []
       }
+      
+      // Fetch from localStorage
+      const localOrders = JSON.parse(localStorage.getItem('localManufacturingOrders') || '[]')
+      
+      // Combine and deduplicate orders (API takes precedence)
+      const apiOrderIds = new Set(apiOrders.map(order => order.id))
+      const uniqueLocalOrders = localOrders.filter(order => !apiOrderIds.has(order.id))
+      
+      const allOrders = [...apiOrders, ...uniqueLocalOrders]
+      
+      // Apply search filter
+      let filteredOrders = allOrders
+      if (searchTerm) {
+        filteredOrders = allOrders.filter(order => 
+          (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (order.productName && order.productName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (order.finishedProduct && order.finishedProduct.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (order.moNumber && order.moNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+      }
+      
+      // Apply status filter
+      if (selectedStatus) {
+        filteredOrders = filteredOrders.filter(order => 
+          (order.status || 'DRAFT').toUpperCase() === selectedStatus.toUpperCase()
+        )
+      }
+      
+      setManufacturingOrders(filteredOrders)
+      
+      // Update pagination for local data
+      setPagination(prev => ({
+        ...prev,
+        total: filteredOrders.length,
+        pages: Math.ceil(filteredOrders.length / prev.limit)
+      }))
     } catch (err) {
       setError('Failed to load manufacturing orders')
       console.error('Manufacturing orders error:', err)
@@ -150,6 +322,7 @@ const DashboardContent = () => {
       'DRAFT': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
       'CONFIRMED': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
       'IN_PROGRESS': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      'DONE': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
       'TO_CLOSE': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200',
       'CLOSED': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
       'CANCELLED': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
@@ -215,7 +388,10 @@ const DashboardContent = () => {
             
             <div className="flex items-center space-x-4">
               <Button 
-                onClick={loadDashboardData}
+                onClick={() => {
+                  loadDashboardData()
+                  loadManufacturingOrders()
+                }}
                 variant="outline"
                 className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
@@ -225,7 +401,10 @@ const DashboardContent = () => {
                 Refresh
               </Button>
               <Button 
-                onClick={() => setManufacturingOrderOpen(true)}
+                onClick={() => {
+                  setEditingOrderId(null)
+                  setManufacturingOrderOpen(true)
+                }}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm lg:text-base px-4 py-2 lg:px-6 lg:py-3"
               >
                 <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -425,18 +604,29 @@ const DashboardContent = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {manufacturingOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                {manufacturingOrders.map((order) => {
+                  const isLocalOrder = order.createdAt && !order.updatedAt // Local orders have createdAt but no updatedAt
+                  return (
+                    <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-4 lg:px-6 py-4">
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(order.id)}
                         onChange={() => handleRowSelect(order.id)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
+                          className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                       />
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{order.moNumber}</div>
+                        <div className="flex items-center space-x-2">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {order.moNumber || order.orderNumber || order.id}
+                          </div>
+                          {isLocalOrder && (
+                            <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 rounded-full">
+                              Local
+                            </span>
+                          )}
+                        </div>
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">
@@ -471,7 +661,10 @@ const DashboardContent = () => {
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex flex-col lg:flex-row gap-1 lg:gap-3">
                         <button 
-                          onClick={() => setManufacturingOrderOpen(true)}
+                          onClick={() => {
+                            setEditingOrderId(order.id)
+                            setManufacturingOrderOpen(true)
+                          }}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Edit
@@ -485,39 +678,51 @@ const DashboardContent = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
         ) : (
           <div className="p-4 lg:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-              {manufacturingOrders.map((order) => (
-                <div key={order.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+              {manufacturingOrders.map((order) => {
+                const isLocalOrder = order.createdAt && !order.updatedAt // Local orders have createdAt but no updatedAt
+                return (
+                  <div key={order.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-3">
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(order.id)}
                       onChange={() => handleRowSelect(order.id)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
+                        className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                     />
                     <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStateColor(order.status)}`}>
-                        {order.status}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStateColor(order.status)}`}>
+                          {order.status}
+                        </span>
+                        {isLocalOrder && (
+                          <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 rounded-full">
+                            Local
                       </span>
+                        )}
                     </div>
                   </div>
                   
                   <div className="space-y-2 mb-4">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">{order.moNumber}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{order.finishedProduct?.name || 'N/A'}</p>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                        {order.moNumber || order.orderNumber || order.id}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {order.finishedProduct?.name || order.finishedProduct || order.productName || 'N/A'}
+                      </p>
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500 dark:text-gray-400">Start Date:</span>
                       <span className="text-gray-900 dark:text-white">
-                        {order.scheduleDate ? new Date(order.scheduleDate).toLocaleDateString() : 'Not scheduled'}
+                        {order.scheduleDate || order.startDate ? new Date(order.scheduleDate || order.startDate).toLocaleDateString() : 'Not scheduled'}
                       </span>
                     </div>
                     
@@ -543,7 +748,10 @@ const DashboardContent = () => {
                   
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                     <button 
-                      onClick={() => setManufacturingOrderOpen(true)}
+                      onClick={() => {
+                        setEditingOrderId(order.id)
+                        setManufacturingOrderOpen(true)
+                      }}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
                       Edit
@@ -556,7 +764,8 @@ const DashboardContent = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -610,7 +819,14 @@ const DashboardContent = () => {
         {/* Manufacturing Order Popup */}
         <ManufacturingOrderPopup 
           isOpen={manufacturingOrderOpen} 
-          onClose={() => setManufacturingOrderOpen(false)} 
+          orderId={editingOrderId}
+          onClose={() => {
+            setManufacturingOrderOpen(false)
+            setEditingOrderId(null)
+            // Refresh dashboard data when popup closes
+            loadDashboardData()
+            loadManufacturingOrders()
+          }} 
         />
       </div>
     </div>

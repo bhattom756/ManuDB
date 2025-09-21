@@ -29,7 +29,10 @@ const TopNavbar = ({ onMenuClick, user, isMobile = false }) => {
     <header className="">
       <div className="">
         <div className="flex items-center justify-between h-16">
-          <div className="flex justify-start mr-[37rem] gap-2">
+          <div 
+            className="flex justify-start mr-[37rem] gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/dashboard')}
+          >
             <img
               src="https://vercel.com/api/v0/deployments/dpl_DpZgh2AsEdNNq17yzzHfMcnF4mC9/favicon?project=generated-website-mf2ylhp8&readyState=READY&teamId=team_ZnupOUh7lIRyAZsRIudtxDVg"
               alt="Logo"
@@ -38,10 +41,10 @@ const TopNavbar = ({ onMenuClick, user, isMobile = false }) => {
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Manufacturing Hub</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <button
-              onClick={onMenuClick}
-              className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
-            >
+              <button
+                onClick={onMenuClick}
+                className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
+              >
               <svg
                 className="h-6 w-6"
                 fill="none"

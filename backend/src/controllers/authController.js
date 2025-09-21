@@ -101,6 +101,36 @@ class AuthController {
     }
   }
 
+  async forgotPassword(req, res, next) {
+    try {
+      const { email } = req.body;
+      
+      await authService.forgotPassword(email);
+      
+      res.json({
+        success: true,
+        message: 'Password reset email sent successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req, res, next) {
+    try {
+      const { token, password } = req.body;
+      
+      await authService.resetPassword(token, password);
+      
+      res.json({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getAllUsers(req, res, next) {
     try {
       const users = await authService.getAllUsers();

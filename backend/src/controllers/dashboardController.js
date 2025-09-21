@@ -317,7 +317,7 @@ const dashboardController = {
       const ordersResult = await db.query(ordersQuery, queryParams);
 
       // Format the results
-      ordersResult.rows.map(row => ({
+      const manufacturingOrders = ordersResult.rows.map(row => ({
         id: row.id,
         moNumber: row.mo_number,
         quantity: row.quantity,

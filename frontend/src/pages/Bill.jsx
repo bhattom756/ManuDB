@@ -1,17 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import BillOfMaterialsForm from '../components/BillForm'
+import ConfirmDialog from '../components/ConfirmDialog'
 import billsOfMaterialsData from '@/data/billsOfMaterials.json'
+import toast from 'react-hot-toast'
 
 const BillsOfMaterialsContent = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState('card') // 'list' or 'card'
   const [showForm, setShowForm] = useState(false)
   const [editingBOM, setEditingBOM] = useState(null)
+  const [billsOfMaterials, setBillsOfMaterials] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [bomToDelete, setBomToDelete] = useState(null)
 
-  // Use data from JSON file
-  const billsOfMaterials = billsOfMaterialsData.billsOfMaterials
+  // Load initial data
+  useEffect(() => {
+    setBillsOfMaterials(billsOfMaterialsData.billsOfMaterials)
+  }, [])
 
   const filteredBOMs = billsOfMaterials.filter(bom => 
     bom.finishedProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,6 +39,78 @@ const BillsOfMaterialsContent = () => {
   const handleCloseForm = () => {
     setShowForm(false)
     setEditingBOM(null)
+  }
+
+  const handleDeleteBOM = (bom) => {
+    setBomToDelete(bom)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!bomToDelete) return
+
+    try {
+      setLoading(true)
+      
+      // Show loading toast
+      toast.loading('Deleting bill of materials...', { id: 'delete-bom' })
+      
+      // Simulate API call to delete from database
+      // In a real app, you would call your backend API here
+      console.log('Deleting BOM from database:', bomToDelete.id)
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Remove from frontend state
+      setBillsOfMaterials(prevBOMs => prevBOMs.filter(bom => bom.id !== bomToDelete.id))
+      
+      toast.success('Bill of materials deleted successfully', { id: 'delete-bom' })
+    } catch (error) {
+      console.error('Error deleting bill of materials:', error)
+      toast.error('Failed to delete bill of materials', { id: 'delete-bom' })
+    } finally {
+      setLoading(false)
+      setBomToDelete(null)
+    }
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false)
+    setBomToDelete(null)
+  }
+
+  const handleSaveBOM = async (formData) => {
+    try {
+      setLoading(true)
+      
+      if (editingBOM) {
+        toast.loading('Updating bill of materials...', { id: 'save-bom' })
+        console.log('Updating BOM in database:', formData)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+        setBillsOfMaterials(prevBOMs => 
+          prevBOMs.map(bom => 
+            bom.id === editingBOM.id 
+              ? { ...bom, ...formData, id: editingBOM.id }
+              : bom
+          )
+        )
+        toast.success('Bill of materials updated successfully', { id: 'save-bom' })
+      } else {
+        toast.loading('Creating bill of materials...', { id: 'save-bom' })
+        console.log('Creating new BOM in database:', formData)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+        const newId = `BOM-${String(billsOfMaterials.length + 1).padStart(3, '0')}`
+        setBillsOfMaterials(prevBOMs => [...prevBOMs, { ...formData, id: newId }])
+        toast.success('Bill of materials created successfully', { id: 'save-bom' })
+      }
+      handleCloseForm()
+    } catch (error) {
+      console.error('Error saving bill of materials:', error)
+      toast.error('Failed to save bill of materials', { id: 'save-bom' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -140,11 +220,18 @@ const BillsOfMaterialsContent = () => {
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditBOM(bom)}
-                              className="text-blue-600 hover:text-blue-900"
+                              disabled={loading}
+                              className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Edit
                             </button>
-                            <button className="text-red-600 hover:text-red-900">Delete</button>
+                            <button 
+                              onClick={() => handleDeleteBOM(bom)}
+                              disabled={loading}
+                              className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -203,11 +290,16 @@ const BillsOfMaterialsContent = () => {
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                         <button 
                           onClick={() => handleEditBOM(bom)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          disabled={loading}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <button 
+                          onClick={() => handleDeleteBOM(bom)}
+                          disabled={loading}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                           Delete
                         </button>
                       </div>
@@ -242,8 +334,22 @@ const BillsOfMaterialsContent = () => {
           isOpen={showForm}
           onClose={handleCloseForm}
           editingBOM={editingBOM}
+          onSave={handleSaveBOM}
+          loading={loading}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={confirmDelete}
+        title="Delete Bill of Materials"
+        description={`Are you sure you want to delete "${bomToDelete?.finishedProduct}"?\n\nThis action cannot be undone and will permanently remove the bill of materials from your system.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   )
 }

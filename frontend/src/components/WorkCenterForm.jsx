@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import toast from 'react-hot-toast'
 
-const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter }) => {
+const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter, onSave, loading = false }) => {
   const [formData, setFormData] = useState({
     name: '',
     costPerHour: '',
@@ -39,10 +40,31 @@ const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter }) => {
     }))
   }
 
-  const handleSave = () => {
-    // Here you would typically save the data to your backend
-    console.log('Saving Work Center:', formData)
-    onClose()
+  const handleSave = async () => {
+    // Validate required fields
+    if (!formData.name.trim()) {
+      toast.error('Work Center Name is required')
+      return
+    }
+    if (!formData.costPerHour || parseFloat(formData.costPerHour) <= 0) {
+      toast.error('Cost per hour must be greater than 0')
+      return
+    }
+    if (!formData.capacity || parseFloat(formData.capacity) <= 0) {
+      toast.error('Capacity must be greater than 0')
+      return
+    }
+    if (!formData.efficiency || parseFloat(formData.efficiency) < 0 || parseFloat(formData.efficiency) > 100) {
+      toast.error('Efficiency must be between 0 and 100')
+      return
+    }
+
+    if (onSave) {
+      await onSave(formData)
+    } else {
+      console.log('Saving Work Center (fallback):', formData)
+      onClose()
+    }
   }
 
   if (!isOpen) return null
@@ -70,9 +92,10 @@ const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter }) => {
             </Button>
             <Button
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>
@@ -97,7 +120,7 @@ const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter }) => {
 
             <div>
               <Label htmlFor="costPerHour" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Cost per Hour ($)
+                Cost per Hour (Rs.)
               </Label>
               <Input
                 id="costPerHour"
@@ -169,7 +192,7 @@ const WorkCenterForm = ({ isOpen, onClose, editingWorkCenter }) => {
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Cost/Hour:</span>
-                <span className="ml-2 font-medium text-gray-900 dark:text-white">${formData.costPerHour || '0'}</span>
+                <span className="ml-2 font-medium text-gray-900 dark:text-white">Rs.{formData.costPerHour || '0'}</span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Capacity:</span>
