@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Import route modules
 const authRoutes = require('./auth');
+const userRoutes = require('./users');
 const dashboardRoutes = require('./dashboard');
 const manufacturingOrderRoutes = require('./manufacturingOrders');
 const productRoutes = require('./products');
@@ -23,6 +24,7 @@ router.get('/health', (req, res) => {
 
 // API routes
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/manufacturing-orders', manufacturingOrderRoutes);
 router.use('/products', productRoutes);
