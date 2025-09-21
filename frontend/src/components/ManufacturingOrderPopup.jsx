@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Select from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import ConfirmDialog from './ConfirmDialog'
 import { manufacturingOrderAPI, productAPI, bomAPI, workOrderAPI, workCenterAPI, userAPI } from '@/services/api'
 import toast from 'react-hot-toast'
 
@@ -21,6 +22,117 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
     deadline: '',
     priority: 'MEDIUM'
   })
+
+  // Create sample data if none exists
+  useEffect(() => {
+    const existingOrders = JSON.parse(localStorage.getItem('localManufacturingOrders') || '[]')
+    if (existingOrders.length === 0) {
+      const sampleOrders = [
+        {
+          id: '1758424500492',
+          orderNumber: 'MO-000001',
+          finishedProduct: 'dining-table',
+          quantity: '5',
+          billOfMaterial: 'bom-dining-table',
+          scheduleDate: '2024-01-15',
+          assignee: 'john-doe',
+          deadline: '2024-01-20',
+          priority: 'HIGH',
+          status: 'CONFIRMED',
+          components: [
+            {
+              id: 'comp-1',
+              productName: 'Wood Plank',
+              availability: '100',
+              toConsume: '10',
+              unit: 'Pieces'
+            },
+            {
+              id: 'comp-2',
+              productName: 'Screws',
+              availability: '500',
+              toConsume: '50',
+              unit: 'Pieces'
+            }
+          ],
+          workOrders: [
+            {
+              id: 'wo-1',
+              operation: 'Cut Wood',
+              workCenter: 'Saw Station',
+              duration: '2 hours',
+              realDuration: '00:00:00',
+              status: 'PLANNED',
+              isRunning: false
+            },
+            {
+              id: 'wo-2',
+              operation: 'Assemble Table',
+              workCenter: 'Assembly Station',
+              duration: '3 hours',
+              realDuration: '00:00:00',
+              status: 'PLANNED',
+              isRunning: false
+            }
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: '1758424500493',
+          orderNumber: 'MO-000002',
+          finishedProduct: 'office-chair',
+          quantity: '10',
+          billOfMaterial: 'bom-office-chair',
+          scheduleDate: '2024-01-16',
+          assignee: 'jane-smith',
+          deadline: '2024-01-22',
+          priority: 'MEDIUM',
+          status: 'IN_PROGRESS',
+          components: [
+            {
+              id: 'comp-3',
+              productName: 'Chair Frame',
+              availability: '50',
+              toConsume: '10',
+              unit: 'Pieces'
+            },
+            {
+              id: 'comp-4',
+              productName: 'Cushion',
+              availability: '25',
+              toConsume: '10',
+              unit: 'Pieces'
+            }
+          ],
+          workOrders: [
+            {
+              id: 'wo-3',
+              operation: 'Weld Frame',
+              workCenter: 'Welding Station',
+              duration: '1.5 hours',
+              realDuration: '00:00:00',
+              status: 'IN_PROGRESS',
+              isRunning: true
+            },
+            {
+              id: 'wo-4',
+              operation: 'Attach Cushion',
+              workCenter: 'Assembly Station',
+              duration: '2 hours',
+              realDuration: '00:00:00',
+              status: 'PLANNED',
+              isRunning: false
+            }
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+      localStorage.setItem('localManufacturingOrders', JSON.stringify(sampleOrders))
+      console.log('Sample manufacturing orders created in localStorage')
+    }
+  }, [])
 
   // Generate order number on component mount
   useEffect(() => {
@@ -48,9 +160,10 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
   const [components, setComponents] = useState([])
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  const [showAddProduct, setShowAddProduct] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
+  const [showAddProduct, setShowAddProduct] = useState(false)
   const [newComponent, setNewComponent] = useState({
     productId: '',
     quantity: '',
@@ -129,58 +242,49 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
   // Fetch initial data
   const fetchInitialData = async () => {
     try {
-      setLoading(true)
+      // Set data loaded immediately for instant UI display
+      setDataLoaded(true)
+      
+      // Load fallback data immediately
+      setProducts(finishedProducts)
+      setBoms(billOfMaterials)
+      setWorkCentersData(workCentersFallback)
+      setUsers(assignees)
       
       // Check if user is authenticated
       const token = localStorage.getItem('token')
       
       if (!token) {
-        // If not authenticated, use fallback data immediately
         console.log('No authentication token found, using fallback data')
-        setProducts(finishedProducts)
-        setBoms(billOfMaterials)
-        setWorkCentersData(workCentersFallback)
-        setUsers(assignees)
-        setLoading(false)
         return
       }
 
-      // Try to fetch from API, but don't fail if it doesn't work
-      const [productsRes, bomsRes, workCentersRes, usersRes] = await Promise.all([
-        productAPI.getProducts().catch(err => {
-          console.warn('Error fetching products, using fallback:', err.message)
-          return []
-        }),
-        bomAPI.getBOMs().catch(err => {
-          console.warn('Error fetching BOMs, using fallback:', err.message)
-          return []
-        }),
-        workCenterAPI.getWorkCenters().catch(err => {
-          console.warn('Error fetching work centers, using fallback:', err.message)
-          return []
-        }),
-        userAPI.getUsers().catch(err => {
-          console.warn('Error fetching users, using fallback:', err.message)
-          return []
-        })
+      // Try to fetch from API in background using Promise.allSettled for robust error handling
+      const results = await Promise.allSettled([
+        productAPI.getProducts(),
+        bomAPI.getBOMs(),
+        workCenterAPI.getWorkCenters(),
+        userAPI.getUsers()
       ])
       
-      // Use API data if available, otherwise fall back to hardcoded data
-      setProducts(productsRes.length > 0 ? productsRes : finishedProducts)
-      setBoms(bomsRes.length > 0 ? bomsRes : billOfMaterials)
-      setWorkCentersData(workCentersRes.length > 0 ? workCentersRes : workCentersFallback)
-      setUsers(usersRes.length > 0 ? usersRes : assignees)
+      // Update with API data if successful, otherwise keep fallback data
+      if (results[0].status === 'fulfilled' && results[0].value.length > 0) {
+        setProducts(results[0].value)
+      }
+      if (results[1].status === 'fulfilled' && results[1].value.length > 0) {
+        setBoms(results[1].value)
+      }
+      if (results[2].status === 'fulfilled' && results[2].value.length > 0) {
+        setWorkCentersData(results[2].value)
+      }
+      if (results[3].status === 'fulfilled' && results[3].value.length > 0) {
+        setUsers(results[3].value)
+      }
       
       console.log('Data loaded successfully')
     } catch (error) {
       console.error('Error fetching initial data:', error)
-      // Don't show error toast, just use fallback data
-      setProducts(finishedProducts)
-      setBoms(billOfMaterials)
-      setWorkCentersData(workCentersFallback)
-      setUsers(assignees)
-    } finally {
-      setLoading(false)
+      // Data already set to fallback values above
     }
   }
 
@@ -189,34 +293,64 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
     if (!orderId) return
     
     try {
-      setLoading(true)
-      const order = await manufacturingOrderAPI.getManufacturingOrder(orderId)
+      // First try to load from localStorage for immediate display
+      const localOrders = JSON.parse(localStorage.getItem('localManufacturingOrders') || '[]')
+      const localOrder = localOrders.find(order => order.id === orderId)
       
-      setFormData({
-        orderId: order.orderNumber || order.id,
-        finishedProduct: order.productId || '',
-        quantity: order.quantity || '',
-        billOfMaterial: order.bomId || '',
-        scheduleDate: order.startDate || '',
-        assignee: order.assigneeId || '',
-        deadline: order.deadline || '',
-        priority: order.priority || 'MEDIUM'
-      })
+      if (localOrder) {
+        setFormData({
+          orderId: localOrder.orderNumber || localOrder.id,
+          finishedProduct: localOrder.finishedProduct || '',
+          quantity: localOrder.quantity || '',
+          billOfMaterial: localOrder.billOfMaterial || '',
+          scheduleDate: localOrder.scheduleDate || '',
+          assignee: localOrder.assignee || '',
+          deadline: localOrder.deadline || '',
+          priority: localOrder.priority || 'MEDIUM'
+        })
+        
+        setMoState(localOrder.status || 'DRAFT')
+        
+        if (localOrder.workOrders) {
+          setWorkOrders(localOrder.workOrders)
+        }
+        
+        if (localOrder.components) {
+          setComponents(localOrder.components)
+        }
+      }
       
-      setMoState(order.status || 'DRAFT')
-      
-      const workOrdersRes = await workOrderAPI.getWorkOrders({ manufacturingOrderId: orderId })
-      setWorkOrders(workOrdersRes)
-      
-      // Load components if they exist
-      if (order.components) {
-        setComponents(order.components)
+      // Then try to fetch from API in background for updates
+      try {
+        const order = await manufacturingOrderAPI.getManufacturingOrder(orderId)
+        
+        setFormData({
+          orderId: order.orderNumber || order.id,
+          finishedProduct: order.productId || '',
+          quantity: order.quantity || '',
+          billOfMaterial: order.bomId || '',
+          scheduleDate: order.startDate || '',
+          assignee: order.assigneeId || '',
+          deadline: order.deadline || '',
+          priority: order.priority || 'MEDIUM'
+        })
+        
+        setMoState(order.status || 'DRAFT')
+        
+        const workOrdersRes = await workOrderAPI.getWorkOrders({ manufacturingOrderId: orderId })
+        setWorkOrders(workOrdersRes)
+        
+        // Load components if they exist
+        if (order.components) {
+          setComponents(order.components)
+        }
+      } catch (apiError) {
+        console.error('Error fetching manufacturing order from API:', apiError)
+        // Keep local data if API fails
       }
     } catch (error) {
       console.error('Error fetching manufacturing order:', error)
-      toast.error('Failed to fetch manufacturing order')
-    } finally {
-      setLoading(false)
+      // Don't show error toast, just use local data if available
     }
   }
 
@@ -365,7 +499,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
     }
     
     try {
-      setLoading(true)
       setMoState('CONFIRMED')
       
       // Reserve stock (simulate)
@@ -383,13 +516,11 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       console.error('Error confirming MO:', error)
       toast.error('Failed to confirm manufacturing order')
     } finally {
-      setLoading(false)
     }
   }
   
   const startProduction = async () => {
     try {
-      setLoading(true)
       setMoState('IN_PROGRESS')
       
       // Update work orders to PLANNED status
@@ -406,13 +537,11 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       console.error('Error starting production:', error)
       toast.error('Failed to start production')
     } finally {
-      setLoading(false)
     }
   }
   
   const pauseProduction = async () => {
     try {
-      setLoading(true)
       
       // Pause all running work orders
       setWorkOrders(prev => prev.map(wo => {
@@ -435,13 +564,11 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       console.error('Error pausing production:', error)
       toast.error('Failed to pause production')
     } finally {
-      setLoading(false)
     }
   }
   
   const markAsDone = async () => {
     try {
-      setLoading(true)
       setMoState('DONE')
       
       // Update stock ledger (simulate)
@@ -462,7 +589,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       console.error('Error marking as done:', error)
       toast.error('Failed to mark as done')
     } finally {
-      setLoading(false)
     }
   }
 
@@ -505,20 +631,23 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
   // Delete manufacturing order
   const handleDelete = async () => {
     try {
-      setLoading(true)
+      // Show loading toast
+      toast.loading('Deleting manufacturing order...', { id: 'delete-mo' })
       
       // Remove from localStorage
       const existingOrders = JSON.parse(localStorage.getItem('localManufacturingOrders') || '[]')
       const updatedOrders = existingOrders.filter(order => order.id !== formData.orderId)
       localStorage.setItem('localManufacturingOrders', JSON.stringify(updatedOrders))
       
-      toast.success('Manufacturing order deleted successfully!')
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      toast.success('Manufacturing order deleted successfully!', { id: 'delete-mo' })
       onClose()
     } catch (error) {
       console.error('Error deleting manufacturing order:', error)
-      toast.error('Failed to delete manufacturing order')
+      toast.error('Failed to delete manufacturing order', { id: 'delete-mo' })
     } finally {
-      setLoading(false)
       setShowDeleteDialog(false)
     }
   }
@@ -526,7 +655,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
   const cancelMO = async () => {
     if (window.confirm('Are you sure you want to cancel this manufacturing order?')) {
       try {
-        setLoading(true)
         setMoState('CANCELLED')
         
         // Stop all running work orders
@@ -544,7 +672,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
         console.error('Error cancelling MO:', error)
         toast.error('Failed to cancel manufacturing order')
       } finally {
-        setLoading(false)
       }
     }
   }
@@ -732,7 +859,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
     }
 
     try {
-      setLoading(true)
       
       // Check if user is authenticated and has real API data
       const token = localStorage.getItem('token')
@@ -823,7 +949,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
         toast.error(`Failed to save manufacturing order: ${error.response?.data?.message || error.message}`)
       }
     } finally {
-      setLoading(false)
     }
   }
 
@@ -899,14 +1024,6 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       
       {/* Manufacturing Order Popup */}
       <div className="fixed inset-4 bg-white dark:bg-gray-800 rounded-lg shadow-2xl z-50 overflow-hidden">
-        {loading && (
-          <div className="absolute inset-0 bg-white dark:bg-gray-800 bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
-              <span className="text-gray-600 dark:text-gray-300">Loading form data...</span>
-            </div>
-          </div>
-        )}
         {/* Header Section */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           {/* Left side - Title */}
@@ -965,6 +1082,12 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
                  >
                   Cancel
                 </Button>
+                <Button 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white px-4 py-2"
+                >
+                  Delete
+                </Button>
               </>
              )}
              
@@ -994,6 +1117,12 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
                    className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white px-4 py-2"
                  >
                    Cancel
+                 </Button>
+                 <Button 
+                   onClick={() => setShowDeleteDialog(true)}
+                   className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white px-4 py-2"
+                 >
+                   Delete
                  </Button>
                </>
              )}
@@ -1537,34 +1666,16 @@ const ManufacturingOrderPopup = ({ isOpen, onClose, orderId = null }) => {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete Manufacturing Order</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this manufacturing order? This action cannot be undone.
-              <br />
-              <strong>Order ID:</strong> {formData.orderId}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={loading}
-            >
-              {loading ? 'Deleting...' : 'Delete Order'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Manufacturing Order"
+        description={`Are you sure you want to delete this manufacturing order?\n\nOrder ID: ${formData.orderId}\n\nThis action cannot be undone and will permanently remove the manufacturing order from your system.`}
+        confirmText="Delete Order"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   )
 }

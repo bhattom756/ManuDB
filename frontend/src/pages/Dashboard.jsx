@@ -2,16 +2,22 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ManufacturingOrderPopup from '../components/ManufacturingOrderPopup'
+import ConfirmDialog from '../components/ConfirmDialog'
 import { dashboardAPI, manufacturingOrderAPI } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import toast from 'react-hot-toast'
 
 const DashboardContent = () => {
+  const { user, canAccess } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('All')
   const [selectedStatus, setSelectedStatus] = useState(null)
   const [selectedRows, setSelectedRows] = useState([])
   const [manufacturingOrderOpen, setManufacturingOrderOpen] = useState(false)
   const [editingOrderId, setEditingOrderId] = useState(null)
-  const [viewMode, setViewMode] = useState('card') 
+  const [viewMode, setViewMode] = useState('card')
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [orderToDelete, setOrderToDelete] = useState(null) 
 
   // Data states
   const [manufacturingOrders, setManufacturingOrders] = useState([])
@@ -301,19 +307,78 @@ const DashboardContent = () => {
   }
 
   // Handle delete manufacturing order
-  const handleDeleteOrder = async (orderId) => {
-    if (window.confirm('Are you sure you want to delete this manufacturing order?')) {
-      try {
-        const response = await manufacturingOrderAPI.deleteManufacturingOrder(orderId)
-        if (response.success) {
-          // Reload the data
-          loadManufacturingOrders()
-          setSelectedRows(prev => prev.filter(id => id !== orderId))
-        }
-      } catch (err) {
-        setError('Failed to delete manufacturing order')
-        console.error('Delete error:', err)
+  const handleDeleteOrder = (orderId) => {
+    const order = manufacturingOrders.find(o => o.id === orderId)
+    setOrderToDelete(order)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteOrder = async () => {
+    if (!orderToDelete) return
+
+    try {
+      setLoading(true)
+      
+      // Show loading toast
+      toast.loading('Deleting manufacturing order...', { id: 'delete-mo' })
+      
+      const response = await manufacturingOrderAPI.deleteManufacturingOrder(orderToDelete.id)
+      if (response.success) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Reload the data
+        loadManufacturingOrders()
+        setSelectedRows(prev => prev.filter(id => id !== orderToDelete.id))
+        
+        toast.success('Manufacturing order deleted successfully!', { id: 'delete-mo' })
       }
+    } catch (err) {
+      console.error('Delete error:', err)
+      toast.error('Failed to delete manufacturing order', { id: 'delete-mo' })
+    } finally {
+      setLoading(false)
+      setOrderToDelete(null)
+    }
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false)
+    setOrderToDelete(null)
+  }
+
+  // Role-based helper functions
+  const getRoleBasedTitle = () => {
+    if (!user) return 'Manufacturing Dashboard'
+    
+    switch (user.role) {
+      case 'BUSINESS_OWNER':
+        return 'Executive Dashboard'
+      case 'MANUFACTURING_MANAGER':
+        return 'Manufacturing Dashboard'
+      case 'INVENTORY_MANAGER':
+        return 'Inventory Dashboard'
+      case 'OPERATOR':
+        return 'Work Orders Dashboard'
+      default:
+        return 'Manufacturing Dashboard'
+    }
+  }
+
+  const getRoleBasedDescription = () => {
+    if (!user) return 'Monitor and manage your production orders'
+    
+    switch (user.role) {
+      case 'BUSINESS_OWNER':
+        return 'Monitor KPIs, generate reports, and manage all operations'
+      case 'MANUFACTURING_MANAGER':
+        return 'Oversee manufacturing orders, work orders, and production KPIs'
+      case 'INVENTORY_MANAGER':
+        return 'Track stock movements, manage inventory, and monitor stock levels'
+      case 'OPERATOR':
+        return 'Execute assigned work orders and update production status'
+      default:
+        return 'Monitor and manage your production orders'
     }
   }
 
@@ -372,15 +437,15 @@ const DashboardContent = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {dashboardData?.title || 'Manufacturing Dashboard'}
+                {getRoleBasedTitle()}
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm lg:text-base">
-                {dashboardData?.description || 'Monitor and manage your production orders'}
+                {getRoleBasedDescription()}
               </p>
-              {dashboardData?.userRole && (
+              {user?.role && (
                 <div className="mt-2">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
-                    {dashboardData.userRole.replace('_', ' ')}
+                    {user.role.replace('_', ' ')}
                   </span>
                 </div>
               )}
@@ -400,19 +465,21 @@ const DashboardContent = () => {
                 </svg>
                 Refresh
               </Button>
-              <Button 
-                onClick={() => {
-                  setEditingOrderId(null)
-                  setManufacturingOrderOpen(true)
-                }}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm lg:text-base px-4 py-2 lg:px-6 lg:py-3"
-              >
-                <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span className="hidden sm:inline">New Manufacturing Order</span>
-                <span className="sm:hidden">New Order</span>
-              </Button>
+              {canAccess('manufacturing-orders', 'create') && (
+                <Button 
+                  onClick={() => {
+                    setEditingOrderId(null)
+                    setManufacturingOrderOpen(true)
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-sm lg:text-base px-4 py-2 lg:px-6 lg:py-3"
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span className="hidden sm:inline">New Manufacturing Order</span>
+                  <span className="sm:hidden">New Order</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -827,6 +894,18 @@ const DashboardContent = () => {
             loadDashboardData()
             loadManufacturingOrders()
           }} 
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={confirmDeleteOrder}
+          title="Delete Manufacturing Order"
+          description={`Are you sure you want to delete this manufacturing order?\n\nOrder ID: ${orderToDelete?.id}\nProduct: ${orderToDelete?.finishedProduct}\n\nThis action cannot be undone and will permanently remove the manufacturing order from your system.`}
+          confirmText={loading ? 'Deleting...' : 'Delete Order'}
+          cancelText="Cancel"
+          variant="destructive"
         />
       </div>
     </div>

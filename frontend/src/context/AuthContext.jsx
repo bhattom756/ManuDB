@@ -118,6 +118,72 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  // Role-based helper functions
+  const hasRole = (role) => {
+    return user?.role === role;
+  };
+
+  const hasAnyRole = (roles) => {
+    return user && roles.includes(user.role);
+  };
+
+  const isAdmin = () => hasRole('BUSINESS_OWNER');
+  const isManufacturingManager = () => hasRole('MANUFACTURING_MANAGER');
+  const isInventoryManager = () => hasRole('INVENTORY_MANAGER');
+  const isOperator = () => hasRole('OPERATOR');
+
+  // Permission checks
+  const canAccess = (resource, action) => {
+    if (!user) return false;
+    
+    const permissions = {
+      'manufacturing-orders': {
+        'create': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'read': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER', 'INVENTORY_MANAGER'],
+        'update': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'delete': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER']
+      },
+      'work-orders': {
+        'create': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'read': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER', 'INVENTORY_MANAGER', 'OPERATOR'],
+        'update': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER', 'OPERATOR'],
+        'delete': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER']
+      },
+      'work-centers': {
+        'create': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'read': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER', 'INVENTORY_MANAGER', 'OPERATOR'],
+        'update': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'delete': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER']
+      },
+      'stock-ledger': {
+        'create': ['BUSINESS_OWNER', 'INVENTORY_MANAGER'],
+        'read': ['BUSINESS_OWNER', 'INVENTORY_MANAGER', 'MANUFACTURING_MANAGER'],
+        'update': ['BUSINESS_OWNER', 'INVENTORY_MANAGER'],
+        'delete': ['BUSINESS_OWNER', 'INVENTORY_MANAGER']
+      },
+      'boms': {
+        'create': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'read': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER', 'INVENTORY_MANAGER'],
+        'update': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'delete': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER']
+      },
+      'reports': {
+        'all': ['BUSINESS_OWNER'],
+        'production': ['BUSINESS_OWNER', 'MANUFACTURING_MANAGER'],
+        'stock': ['BUSINESS_OWNER', 'INVENTORY_MANAGER'],
+        'personal': ['OPERATOR']
+      }
+    };
+
+    const resourcePermissions = permissions[resource];
+    if (!resourcePermissions) return false;
+
+    const allowedRoles = resourcePermissions[action];
+    if (!allowedRoles) return false;
+
+    return allowedRoles.includes(user.role);
+  };
+
   const value = {
     user,
     loading,
@@ -127,7 +193,15 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     clearError,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    // Role-based functions
+    hasRole,
+    hasAnyRole,
+    isAdmin,
+    isManufacturingManager,
+    isInventoryManager,
+    isOperator,
+    canAccess
   };
 
   return (

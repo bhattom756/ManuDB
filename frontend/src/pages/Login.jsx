@@ -27,16 +27,31 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     setIsLoading(true)
+    // Show loading toast immediately
+    const loadingToast = toast.loading('Logging you in...', {
+      duration: Infinity, // Keep loading toast until dismissed
+    })
+    
     try {
       console.log('Attempting login with:', data.email)
-      toast.loading('Logging you in...', { id: 'login' })
       const response = await login(data.email, data.password)
       console.log('Login response:', response)
-      toast.success('Logged in successfully!', { id: 'login' })
-      navigate('/dashboard')
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast)
+      toast.success('Welcome back! Redirecting to dashboard...', {
+        duration: 2000,
+      })
+      // Small delay to show success message before navigation
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 500)
     } catch (error) {
       console.error('Login error:', error)
-      toast.error(error.response?.data?.error || 'Login failed', { id: 'login' })
+      
+      // Dismiss loading toast and show error
+      toast.dismiss(loadingToast)
+      toast.error(error.response?.data?.error || 'Login failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
