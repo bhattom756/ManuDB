@@ -66,7 +66,9 @@ class AuthService {
     );
 
     if (userResult.rows.length === 0) {
-      throw new Error('Invalid credentials');
+      const err = new Error('Invalid credentials');
+      err.statusCode = 401;
+      throw err;
     }
 
     const user = userResult.rows[0];
@@ -75,7 +77,9 @@ class AuthService {
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+      const err = new Error('Invalid credentials');
+      err.statusCode = 401;
+      throw err;
     }
 
     // Generate JWT token
