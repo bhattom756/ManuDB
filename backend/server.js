@@ -33,7 +33,7 @@ app.use(cors({
 }));
 
 // Explicitly respond to preflight
-app.options('*', cors());
+
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
