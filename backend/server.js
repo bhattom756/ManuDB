@@ -36,20 +36,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // API routes
 app.use('/api', routes);
 
-// Serve static files from React app (for Docker deployment)
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  
-  // Handle React routing, return all requests to React app
-  app.get('/*', (req, res) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'API endpoint not found' });
-    }
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-  });
-} else {
+// Development mode - API info endpoint
+if (process.env.NODE_ENV !== 'production') {
   // Development mode - API info endpoint
   app.get('/', (req, res) => {
     res.json({
