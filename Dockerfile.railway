@@ -1,4 +1,4 @@
-# Multi-stage build for production
+# Railway-optimized Dockerfile
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
-# Install backend dependencies (without postinstall script)
+# Install backend dependencies
 WORKDIR /app/backend
 RUN npm ci --only=production --ignore-scripts
 
@@ -39,9 +39,6 @@ COPY backend/ ./backend/
 
 # Copy built frontend
 COPY --from=frontend-builder /app/dist ./frontend/dist
-
-# Run database setup for production
-RUN cd backend && npm run prod-setup || echo "Database setup will run on first start"
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
