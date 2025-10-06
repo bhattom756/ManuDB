@@ -14,13 +14,26 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+// CORS configuration (supports multiple origins and Vercel previews)
+const allowedOriginsEnv = process.env.CORS_ORIGIN || 'http://localhost:3000';
+const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow server-to-server and curl
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(new URL(origin).hostname);
+    return isAllowed ? callback(null, true) : callback(new Error('CORS not allowed'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+}));
+
+// Explicitly respond to preflight
+app.options('*', cors());
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {

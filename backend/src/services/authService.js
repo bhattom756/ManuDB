@@ -15,6 +15,12 @@ class AuthService {
   async register(userData) {
     const { name, email, password, mobileNo, role = 'OPERATOR' } = userData;
 
+    if (!name || !email || !password) {
+      const err = new Error('Name, email and password are required');
+      err.statusCode = 400;
+      throw err;
+    }
+
     // Check if user already exists
     const existingUserResult = await db.query(
       'SELECT id FROM users WHERE email = $1',
@@ -22,7 +28,9 @@ class AuthService {
     );
 
     if (existingUserResult.rows.length > 0) {
-      throw new Error('User with this email already exists');
+      const err = new Error('User with this email already exists');
+      err.statusCode = 409; // conflict
+      throw err;
     }
 
     // Hash password
