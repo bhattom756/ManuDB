@@ -50,9 +50,9 @@ USER nextjs
 # Expose port (Railway will set PORT automatically)
 EXPOSE $PORT
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node backend/healthcheck.js
+# Health check (Railway handles this automatically)
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD node backend/healthcheck.js
 
 # Start the application
 CMD ["node", "backend/server.js"]

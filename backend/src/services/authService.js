@@ -4,8 +4,12 @@ const crypto = require('crypto');
 const sgMail = require('@sendgrid/mail');
 const db = require('../config/database');
 
-// Configure SendGrid
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Configure SendGrid (only if API key is provided)
+if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+  console.log('⚠️  SendGrid API key not configured. Email features will be disabled.');
+}
 
 class AuthService {
   async register(userData) {
@@ -355,6 +359,13 @@ class AuthService {
           </div>
         `
       };
+
+      // Check if SendGrid is configured
+      if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+        console.log('⚠️  SendGrid not configured. Password reset email would be sent to:', email);
+        console.log('Reset URL:', resetUrl);
+        return { message: 'Password reset email would be sent (SendGrid not configured)' };
+      }
 
       await sgMail.send(msg);
 

@@ -14,12 +14,21 @@ const stockLedgerRoutes = require('./stockLedger');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Manufacturing Management System API is running',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+  try {
+    res.status(200).json({
+      success: true,
+      message: 'Manufacturing Management System API is running',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      status: 'healthy'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Health check failed',
+      error: error.message
+    });
+  }
 });
 
 // API routes
