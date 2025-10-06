@@ -19,7 +19,7 @@ RUN npm ci
 
 # Build frontend
 FROM base AS frontend-builder
-WORKDIR /app
+WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
@@ -38,10 +38,11 @@ COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY backend/ ./backend/
 
 # Copy built frontend
-COPY --from=frontend-builder /app/dist ./frontend/dist
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Run database setup for production
-RUN cd backend && npm run prod-setup || echo "Database setup will run on first start"
+# Copy startup script
+COPY start.sh ./
+RUN chmod +x start.sh
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
@@ -55,4 +56,4 @@ EXPOSE $PORT
 #   CMD node backend/healthcheck.js
 
 # Start the application
-CMD ["node", "backend/server.js"]
+CMD ["./start.sh"]
