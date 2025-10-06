@@ -36,24 +36,35 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // API routes
 app.use('/api', routes);
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Manufacturing Management System API',
-    version: '1.0.0',
-    documentation: '/api/health',
-    endpoints: {
-      auth: '/api/auth',
-      manufacturingOrders: '/api/manufacturing-orders',
-      products: '/api/products',
-      boms: '/api/boms',
-      workOrders: '/api/work-orders',
-      workCenters: '/api/work-centers',
-      stockLedger: '/api/stock-ledger'
-    }
+// Serve static files from React app (for Docker deployment)
+if (process.env.NODE_ENV === 'production') {
+  const path = require('path');
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   });
-});
+} else {
+  // Development mode - API info endpoint
+  app.get('/', (req, res) => {
+    res.json({
+      success: true,
+      message: 'Manufacturing Management System API',
+      version: '1.0.0',
+      documentation: '/api/health',
+      endpoints: {
+        auth: '/api/auth',
+        manufacturingOrders: '/api/manufacturing-orders',
+        products: '/api/products',
+        boms: '/api/boms',
+        workOrders: '/api/work-orders',
+        workCenters: '/api/work-centers',
+        stockLedger: '/api/stock-ledger'
+      }
+    });
+  });
+}
 
 // 404 handler
 app.use(notFound);

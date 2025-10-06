@@ -8,7 +8,9 @@
     "dev": "nodemon server.js",
     "setup": "node setup-database.js",
     "init-db": "node scripts/init-db.js",
-    "seed": "node seed-admin.js"
+    "seed": "node seed-admin.js",
+    "build": "echo 'No build step required for Node.js'",
+    "prod-setup": "node scripts/production-setup.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
